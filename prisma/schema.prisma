@@ -1,0 +1,444 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==== ENUMS ====
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+enum ActivityStatus {
+  PENDING
+  COMPLETED
+}
+
+enum ActivityPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ActivityType {
+  NOTE
+  CALL
+  TASK
+  EMAIL
+  MEETING
+}
+
+enum EntityType {
+  CONTACT
+  COMPANY
+  DEAL
+}
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  DATE
+  DROPDOWN
+  BOOLEAN
+}
+
+enum triggerType {
+  CREATED
+  UPDATED
+  DELETED
+  STAGE_CHANGED
+}
+
+enum ActionType {
+  SEND_EMAIL
+  CREATE_TASK
+  UPDATE_FIELD
+  WEBHOOK
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum BillingPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+// ==== CORE TENANT MODELS ====
+
+model User {
+  id           String  @id @default(uuid())
+  name         String
+  email        String  @unique
+  passwordHash String
+  avatar       String?
+  role         Role    @default(USER) // Global role
+
+  memberships WorkspaceMember[]
+  invites     WorkspaceInvite[] @relation("InvitedByUser")
+
+  activities       Activity[]
+  auditLogs        AuditLog[]
+  sentMessages     ChatMessage[]  @relation("SentMessages")
+  receivedMessages ChatMessage[]  @relation("ReceivedMessages")
+  notifications    Notification[]
+  conversationsAsA Conversation[] @relation("UserA")
+  conversationsAsB Conversation[] @relation("UserB")
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Workspace {
+  id   String      @id @default(uuid())
+  name String
+  slug String      @unique
+  logo String?
+  plan BillingPlan @default(FREE)
+
+  members WorkspaceMember[]
+  invites WorkspaceInvite[]
+  apiKeys ApiKey[]
+
+  // Tenant Scoped Data
+  companies     Company[]
+  contacts      Contact[]
+  deals         Deal[]
+  pipelines     Pipeline[]
+  customFields  CustomField[]
+  workflows     Workflow[]
+  tags          Tag[]
+  leadStatuses  LeadStatus[]
+  activities    Activity[]
+  auditLogs     AuditLog[]
+  conversations Conversation[]
+  notifications Notification[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model WorkspaceMember {
+  id          String        @id @default(uuid())
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        WorkspaceRole @default(MEMBER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workspaceId, userId])
+}
+
+model WorkspaceInvite {
+  id          String        @id @default(uuid())
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String
+  role        WorkspaceRole @default(MEMBER)
+  status      InviteStatus  @default(PENDING)
+  token       String        @unique
+
+  inviterId String?
+  inviter   User?   @relation("InvitedByUser", fields: [inviterId], references: [id], onDelete: SetNull)
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workspaceId, email])
+}
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  keyHash     String    @unique
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+// ==== APP DATA MODELS ====
+
+model Company {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name     String
+  domain   String?
+  industry String?
+
+  contacts Contact[]
+  deals    Deal[]
+  tags     Tag[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([workspaceId, name])
+}
+
+model LeadStatus {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name     String
+  color    String    @default("#E2E8F0")
+  order    Int       @default(0)
+  contacts Contact[]
+
+  @@unique([workspaceId, name])
+}
+
+model Contact {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  companyId    String?
+  company      Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  name         String
+  email        String?
+  phone        String?
+  statusId     String?
+  status       LeadStatus? @relation(fields: [statusId], references: [id], onDelete: SetNull)
+  followUpDate DateTime?
+
+  deals Deal[]
+  tags  Tag[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([workspaceId, email])
+}
+
+model Pipeline {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name      String
+  isDefault Boolean @default(false)
+
+  stages Stage[]
+  deals  Deal[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Stage {
+  id         String   @id @default(uuid())
+  pipelineId String
+  pipeline   Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  name       String
+  order      Int
+  color      String   @default("#4a90e2")
+  deals      Deal[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Deal {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  title     String
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  value     Decimal  @default(0)
+
+  pipelineId String?
+  pipeline   Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: SetNull)
+  stageId    String?
+  stage      Stage?    @relation(fields: [stageId], references: [id], onDelete: SetNull)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ==== CUSTOM FIELDS ENGINE ====
+model CustomField {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  entityType EntityType // CONTACT, COMPANY, DEAL
+  name       String
+  type       CustomFieldType // TEXT, NUMBER, DATE, DROPDOWN, BOOLEAN
+  options    String? // JSON array string for DROPDOWN options
+
+  values CustomFieldValue[]
+
+  createdAt DateTime @default(now())
+}
+
+model CustomFieldValue {
+  id       String      @id @default(uuid())
+  fieldId  String
+  field    CustomField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  entityId String // ID of the Contact, Company, or Deal
+
+  textValue    String?
+  numberValue  Float?
+  dateValue    DateTime?
+  booleanValue Boolean?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([fieldId, entityId])
+}
+
+// ==== AUTOMATIONS / WORKFLOWS ====
+model Workflow {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name              String
+  description       String?
+  isActive          Boolean     @default(true)
+  entityType        EntityType
+  triggerType       triggerType
+  triggerConditions String?
+
+  actions WorkflowAction[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model WorkflowAction {
+  id         String     @id @default(uuid())
+  workflowId String
+  workflow   Workflow   @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  type       ActionType
+  configJson String
+  order      Int        @default(0)
+  createdAt  DateTime   @default(now())
+}
+
+model Activity {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  userId     String
+  user       User             @relation(fields: [userId], references: [id])
+  entityType EntityType
+  entityId   String
+  type       ActivityType
+  content    String
+  priority   ActivityPriority @default(MEDIUM)
+  status     ActivityStatus   @default(PENDING)
+  dueDate    DateTime?
+
+  deletedAt DateTime?
+  timestamp DateTime  @default(now())
+}
+
+model Tag {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  name  String
+  color String @default("#4a90e2")
+
+  contacts  Contact[]
+  companies Company[]
+
+  @@unique([workspaceId, name])
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  entityId  String
+  timestamp DateTime @default(now())
+}
+
+model Conversation {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  userAId  String
+  userA    User          @relation("UserA", fields: [userAId], references: [id])
+  userBId  String
+  userB    User          @relation("UserB", fields: [userBId], references: [id])
+  messages ChatMessage[]
+
+  deletedAt DateTime?
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
+
+  // Note: Uniqueness might be scoped to workspace if users can be in multiple workspaces and have isolated chats
+  @@unique([workspaceId, userAId, userBId])
+}
+
+model ChatMessage {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId     String
+  receiver       User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  content        String
+  read           Boolean      @default(false)
+  timestamp      DateTime     @default(now())
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  timestamp DateTime @default(now())
+}

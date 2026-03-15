@@ -1,0 +1,18 @@
+﻿src/app/api/activities/route.ts(12,7): error TS2322: Type '{ entityType?: string | undefined; entityId?: string | undefined; }' is not assignable to type 'ActivityWhereInput'.
+  Types of property 'entityType' are incompatible.
+    Type 'string | undefined' is not assignable to type 'EnumEntityTypeFilter<"Activity"> | EntityType | undefined'.
+      Type 'string' is not assignable to type 'EnumEntityTypeFilter<"Activity"> | EntityType | undefined'.
+src/app/api/activities/route.ts(43,7): error TS2322: Type '{ dueDate: Date | undefined; userId: string; entityType: "Contact" | "Company" | "Deal"; entityId: string; type: "NOTE" | "CALL" | "TASK"; content: string; priority?: "LOW" | "MEDIUM" | "HIGH" | undefined; status?: "PENDING" | ... 1 more ... | undefined; }' is not assignable to type '(Without<ActivityCreateInput, ActivityUncheckedCreateInput> & ActivityUncheckedCreateInput) | (Without<...> & ActivityCreateInput)'.
+  Type '{ dueDate: Date | undefined; userId: string; entityType: "Contact" | "Company" | "Deal"; entityId: string; type: "NOTE" | "CALL" | "TASK"; content: string; priority?: "LOW" | "MEDIUM" | "HIGH" | undefined; status?: "PENDING" | ... 1 more ... | undefined; }' is not assignable to type 'Without<ActivityCreateInput, ActivityUncheckedCreateInput> & ActivityUncheckedCreateInput'.
+    Type '{ dueDate: Date | undefined; userId: string; entityType: "Contact" | "Company" | "Deal"; entityId: string; type: "NOTE" | "CALL" | "TASK"; content: string; priority?: "LOW" | "MEDIUM" | "HIGH" | undefined; status?: "PENDING" | ... 1 more ... | undefined; }' is not assignable to type 'ActivityUncheckedCreateInput'.
+      Types of property 'entityType' are incompatible.
+        Type '"Contact" | "Company" | "Deal"' is not assignable to type 'EntityType'.
+          Type '"Contact"' is not assignable to type 'EntityType'. Did you mean '"CONTACT"'?
+src/app/api/bulk-import/route.ts(47,13): error TS2559: Type 'string' has no properties in common with type 'LeadStatusCreateNestedOneWithoutContactsInput'.
+src/app/api/dashboard/route.ts(16,16): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'ContactWhereInput'.
+src/app/api/dashboard/route.ts(20,16): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'ContactWhereInput'.
+src/app/settings/automations/page.tsx(115,44): error TS2322: Type '{ type: string; config: { title: string; }; } | { type: string; config: {}; }' is not assignable to type '{ type: string; config: { title: string; }; }'.
+  Type '{ type: string; config: {}; }' is not assignable to type '{ type: string; config: { title: string; }; }'.
+    Types of property 'config' are incompatible.
+      Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
+src/app/settings/automations/page.tsx(115,78): error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
