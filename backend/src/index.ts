@@ -13,13 +13,23 @@ const port = process.env.PORT || 4000;
 const httpServer = createServer(app);
 export const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: ['http://localhost:3000', 'tauri://localhost'],
+    origin: [
+      'http://localhost:3000', 
+      'http://tauri.localhost', 
+      'https://tauri.localhost', 
+      'tauri://localhost'
+    ],
     credentials: true,
   }
 });
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'tauri://localhost'],
+  origin: [
+    'http://localhost:3000', 
+    'http://tauri.localhost', 
+    'https://tauri.localhost', 
+    'tauri://localhost'
+  ],
   credentials: true,
 }));
 app.use(express.json());
