@@ -23,6 +23,15 @@
       "csp": null
     }
   },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "pubkey": "RWQNgmblcCnHpaTNA9G4meCx0ogkoSFlY5fShnItNx/VnCNf1fsFsRlp",
+      "endpoints": [
+        "https://github.com/dpeev3-netizen/adaptica_crm/releases/latest/download/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",
