@@ -25,11 +25,11 @@ export const ContactSchema = z.object({
 
 export const DealSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  companyId: z.string().uuid("Invalid company ID"),
-  contactId: z.string().uuid("Invalid contact ID"),
+  companyId: z.string().uuid("Invalid company ID").optional(),
+  contactId: z.string().uuid("Invalid contact ID").optional(),
   value: z.number().min(0, "Value must be positive").optional(),
-  pipelineId: z.string().uuid("Invalid pipeline ID").optional(),
-  stageId: z.string().uuid("Invalid stage ID").optional(),
+  pipelineId: z.string().uuid("Invalid pipeline ID").optional().or(z.literal("")),
+  stageId: z.string().uuid("Invalid stage ID").optional().or(z.literal("")),
 });
 
 export const ActivitySchema = z.object({

@@ -100,7 +100,8 @@ model User {
   memberships WorkspaceMember[]
   invites     WorkspaceInvite[] @relation("InvitedByUser")
 
-  activities       Activity[]
+  activities       Activity[] // activities created by user
+  assignedTasks    Activity[] @relation("TaskAssignees") // activities assigned to user
   auditLogs        AuditLog[]
   chatMessages     ChatMessage[]
   reactions        MessageReaction[]
@@ -411,6 +412,8 @@ model Activity {
 
   userId     String
   user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignees  User[]           @relation("TaskAssignees")
+  
   entityType EntityType
   entityId   String
   type       ActivityType

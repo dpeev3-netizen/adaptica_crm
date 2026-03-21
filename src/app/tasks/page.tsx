@@ -29,7 +29,19 @@ export default function TasksPage() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ content: "", dueDate: "", priority: "MEDIUM" });
+  const [newTask, setNewTask] = useState<{ content: string; dueDate: string; priority: string; assigneeIds: string[] }>({ 
+    content: "", dueDate: "", priority: "MEDIUM", assigneeIds: [] 
+  });
+
+  // Fetch users for assignment drop-down
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await fetchWithToken("/users");
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
 
   const { data: tasks, isLoading } = useQuery({
     queryKey: ["tasks", filter],
@@ -42,9 +54,8 @@ export default function TasksPage() {
 
   const createMutation = useMutation({
     mutationFn: async (task: any) => {
-      const res = await fetch("/api/tasks", {
+      const res = await fetchWithToken("/tasks", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...task, userId: "system" }),
       });
       if (!res.ok) throw new Error("Failed to create task");
@@ -54,16 +65,15 @@ export default function TasksPage() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       setModalOpen(false);
-      setNewTask({ content: "", dueDate: "", priority: "MEDIUM" });
+      setNewTask({ content: "", dueDate: "", priority: "MEDIUM", assigneeIds: [] });
       toast.success("Task created");
     },
   });
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const res = await fetch(`/api/tasks/${id}`, {
+      const res = await fetchWithToken(`/tasks/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: status === "PENDING" ? "COMPLETED" : "PENDING" }),
       });
       return res.json();
@@ -153,7 +163,10 @@ export default function TasksPage() {
                 <p className={`md-title-medium ${task.status === "COMPLETED" ? "line-through text-on-surface-variant" : "text-on-surface"}`}>
                   {task.content}
                 </p>
-                <div className="flex items-center gap-3 mt-1">
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <span className="md-label-small flex items-center gap-1 text-on-surface-variant">
+                    Added: {format(new Date(task.timestamp || task.createdAt || Date.now()), "MMM d, yyyy h:mm a")}
+                  </span>
                   {task.dueDate && (
                     <span className={`md-label-small flex items-center gap-1 ${
                       isPast(new Date(task.dueDate)) && task.status === "PENDING"
@@ -163,13 +176,23 @@ export default function TasksPage() {
                         : "text-on-surface-variant"
                     }`}>
                       <Calendar size={12} />
-                      {format(new Date(task.dueDate), "MMM d, yyyy")}
+                      Due {format(new Date(task.dueDate), "MMM d, yyyy h:mm a")}
                     </span>
                   )}
                   <span className={`md-label-small flex items-center gap-1 ${PRIORITY_COLORS[task.priority]}`}>
                     <Flag size={12} />
                     {task.priority}
                   </span>
+                  
+                  {task.assignees && task.assignees.length > 0 && (
+                     <div className="flex -space-x-1 mt-1">
+                        {task.assignees.map((u: any) => (
+                           <div key={u.id} className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[9px] font-bold text-on-primary border border-surface shadow-sm" title={u.name}>
+                              {u.name.substring(0,2).toUpperCase()}
+                           </div>
+                        ))}
+                     </div>
+                  )}
                 </div>
               </div>
 
@@ -192,8 +215,32 @@ export default function TasksPage() {
             value={newTask.content}
             onChange={(e) => setNewTask({ ...newTask, content: e.target.value })}
           />
+          <div className="flex flex-col gap-2">
+            <label className="md-label-medium font-bold text-on-surface-variant">Assign To</label>
+            <div className="flex flex-wrap gap-2">
+              {users?.map((u: any) => (
+                <button
+                  key={u.id}
+                  onClick={() => {
+                    const ids = newTask.assigneeIds.includes(u.id) 
+                      ? newTask.assigneeIds.filter(id => id !== u.id) 
+                      : [...newTask.assigneeIds, u.id];
+                    setNewTask({ ...newTask, assigneeIds: ids });
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-all border ${
+                    newTask.assigneeIds.includes(u.id) 
+                      ? "bg-primary text-on-primary font-bold border-primary shadow-sm" 
+                      : "bg-surface border-outline-variant text-on-surface hover:bg-surface-container"
+                  }`}
+                  type="button"
+                >
+                  {u.name}
+                </button>
+              ))}
+            </div>
+          </div>
           <NeoInput
-            type="date"
+            type="datetime-local"
             value={newTask.dueDate}
             onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
           />

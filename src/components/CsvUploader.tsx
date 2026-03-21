@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 import Papa from "papaparse";
 import { UploadCloud, CheckCircle2, AlertCircle, ArrowRight, Table, X } from "lucide-react";
 import NeoButton from "./ui/NeoButton";
+import { fetchWithToken } from "@/lib/api";
 
 // The fields our CRM expects
 const CRM_FIELDS = [
@@ -95,9 +96,8 @@ export default function CsvUploader() {
     });
 
     try {
-      const res = await fetch("/api/bulk-import", {
+      const res = await fetchWithToken("/bulk-import", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 

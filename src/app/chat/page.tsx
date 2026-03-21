@@ -472,9 +472,8 @@ export default function ChatPage() {
       fileType?: string;
       fileSize?: number;
     }) => {
-      const res = await fetch(`/api/chat/channels/${selectedChannel}/messages`, {
+      const res = await fetchWithToken(`/chat/channels/${selectedChannel}/messages`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Failed to send");
@@ -503,9 +502,8 @@ export default function ChatPage() {
   // ─── React to message ─────────────────────────────────────
   const reactMutation = useMutation({
     mutationFn: async ({ messageId, emoji }: { messageId: string; emoji: string }) => {
-      const res = await fetch(`/api/chat/channels/${selectedChannel}/reactions`, {
+      const res = await fetchWithToken(`/chat/channels/${selectedChannel}/reactions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messageId, emoji }),
       });
       if (!res.ok) throw new Error("Failed to react");
@@ -620,9 +618,8 @@ export default function ChatPage() {
     }
 
     try {
-      const res = await fetch("/api/chat/dm", {
+      const res = await fetchWithToken("/chat/dm", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetUserId }),
       });
       if (res.ok) {

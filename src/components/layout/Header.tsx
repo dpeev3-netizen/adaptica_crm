@@ -9,6 +9,8 @@ import { useAuth } from "@/store/useAuth";
 import NeoButton from "@/components/ui/NeoButton";
 import { fetchWithToken } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
+import { io } from "socket.io-client";
+import { toast } from "sonner";
 
 export default function Header() {
   const pathname = usePathname();
@@ -35,6 +37,26 @@ export default function Header() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Real-time notifications socket
+  useEffect(() => {
+    if (!user) return;
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "https://adaptica-crm.onrender.com";
+    const socket = io(socketUrl);
+    
+    socket.on("connect", () => {
+      socket.emit("join", user.id); 
+    });
+    
+    socket.on("new_notification", (notif: any) => {
+      queryClient.invalidateQueries({ queryKey: ['notifications', user.id] });
+      toast.info(notif.title, { description: notif.message });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user, queryClient]);
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.id],
