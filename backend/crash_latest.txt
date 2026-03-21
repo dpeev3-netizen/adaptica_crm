@@ -1,0 +1,22 @@
+Error: Cannot find module '../lib/automations-engine'
+Require stack:
+- C:\Users\Bella\Downloads\CRM\backend\src\controllers\deals.controller.ts
+- C:\Users\Bella\Downloads\CRM\backend\src\routes\deals.routes.ts
+- C:\Users\Bella\Downloads\CRM\backend\src\index.ts
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1421:15)
+    at Module._resolveFilename.sharedData.moduleResolveFilenameHook.installedValue [as _resolveFilename] (C:\Users\Bella\Downloads\CRM\backend\node_modules\@cspotcode\source-map-support\source-map-support.js:811:30)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\Bella\Downloads\CRM\backend\src\controllers\deals.controller.ts:8:1) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\Bella\\Downloads\\CRM\\backend\\src\\controllers\\deals.controller.ts',
+    'C:\\Users\\Bella\\Downloads\\CRM\\backend\\src\\routes\\deals.routes.ts',
+    'C:\\Users\\Bella\\Downloads\\CRM\\backend\\src\\index.ts'
+  ]
+}

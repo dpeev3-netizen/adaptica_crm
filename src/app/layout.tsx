@@ -1,16 +1,12 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/layout/Sidebar";
-import TopBar from "@/components/layout/TopBar";
-import CommandPalette from "@/components/layout/CommandPalette";
 import Providers from "@/Providers";
-
-const inter = Inter({ subsets: ["latin"] });
+import ProtectedRoute from "@/components/ProtectedRoute";
+import MainLayout from "@/components/layout/MainLayout";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "AdapticaCRM — Modern Sales CRM",
-  description: "A full-featured modern CRM for managing contacts, deals, tasks, and team collaboration.",
+  title: "AdapticaCRM — CRM Dashboard",
+  description: "Modern CRM application powered by Material Design 3",
 };
 
 export default function RootLayout({
@@ -19,19 +15,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} antialiased min-h-screen bg-background`}>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body suppressHydrationWarning>
         <Providers>
-          <Sidebar />
-          <div className="pl-64 flex flex-col min-h-screen w-full">
-            <TopBar />
-            <main className="flex-1 p-8">
+          <ProtectedRoute>
+            <MainLayout>
               {children}
-            </main>
-          </div>
-          <CommandPalette />
+            </MainLayout>
+          </ProtectedRoute>
         </Providers>
       </body>
     </html>
   );
 }
+
+

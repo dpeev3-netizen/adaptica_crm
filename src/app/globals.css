@@ -1,48 +1,294 @@
 @import "tailwindcss";
 
-@theme {
-  --color-background: #e0e5ec;
-  --color-foreground: #2d3748;
-  --color-primary: #4a90e2;
-  --color-primary-dark: #357abd;
-  --color-surface: #e0e5ec;
-  --color-muted: #a0aec0;
-  --color-danger: #e53e3e;
-  --color-success: #38a169;
-  --color-warning: #dd6b20;
+/* ===================================================================
+   Material Design 3 — Design Token System
+   Default: Light Mode | Dark Mode via [data-theme="dark"]
+   =================================================================== */
 
-  --shadow-neumorph-flat: 6px 6px 12px #bec3c9, -6px -6px 12px #ffffff;
-  --shadow-neumorph-flat-sm: 3px 3px 6px #bec3c9, -3px -3px 6px #ffffff;
-  --shadow-neumorph-pressed: inset 4px 4px 8px #bec3c9, inset -4px -4px 8px #ffffff;
-  --shadow-neumorph-concave: inset 2px 2px 5px #bec3c9, inset -2px -2px 5px #ffffff;
+@theme {
+  /* --- M3 Primary --- */
+  --color-primary: #0B57D0;
+  --color-primary-dark: #0842A0;
+  --color-on-primary: #FFFFFF;
+  --color-primary-container: #D3E3FD;
+  --color-on-primary-container: #041E49;
+
+  /* --- M3 Secondary --- */
+  --color-secondary: #444746;
+  --color-on-secondary: #FFFFFF;
+  --color-secondary-container: #E1E3E1;
+  --color-on-secondary-container: #1F1F1F;
+
+  /* --- M3 Tertiary --- */
+  --color-tertiary: #006874;
+  --color-on-tertiary: #FFFFFF;
+  --color-tertiary-container: #97F0FF;
+  --color-on-tertiary-container: #001F24;
+
+  /* --- M3 Surfaces (Light Default) --- */
+  --color-surface: #FFFFFF;
+  --color-surface-dim: #DED8E1;
+  --color-surface-bright: #FEF7FF;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F0F4F9;
+  --color-surface-container: #E8EAED;
+  --color-surface-container-high: #F1F3F4;
+  --color-surface-container-highest: #E3E3E3;
+  --color-on-surface: #1F1F1F;
+  --color-on-surface-variant: #444746;
+  --color-outline: #E3E3E3;
+  --color-outline-variant: #C7C7C7;
+
+  /* --- M3 Semantic Status Colors --- */
+  --color-error: #B3261E;
+  --color-on-error: #FFFFFF;
+  --color-error-container: #F9DEDC;
+  --color-on-error-container: #410E0B;
+  --color-success: #1B6B3B;
+  --color-success-container: #A8F5C1;
+  --color-on-success-container: #00210E;
+  --color-warning: #7C5800;
+  --color-warning-container: #FFDEA6;
+  --color-on-warning-container: #261900;
+
+  /* --- M3 Inverse --- */
+  --color-inverse-surface: #322F35;
+  --color-inverse-on-surface: #F5EFF7;
+  --color-inverse-primary: #A8C7FA;
+
+  /* --- Background Alias --- */
+  --color-background: #FFFFFF;
+  --color-foreground: #1F1F1F;
+
+  /* --- M3 Elevation Shadows --- */
+  --shadow-elevation-1: 0px 1px 3px 1px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.30);
+  --shadow-elevation-2: 0px 2px 6px 2px rgba(0,0,0,0.15), 0px 1px 2px 0px rgba(0,0,0,0.30);
+  --shadow-elevation-3: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.30);
+  --shadow-elevation-4: 0px 6px 10px 4px rgba(0,0,0,0.15), 0px 2px 3px 0px rgba(0,0,0,0.30);
 }
 
-:root {
-  --background: #e0e5ec;
-  --foreground: #2d3748;
+/* ===================================================================
+   Dark Mode Token Overrides  
+   Using M3 surface elevation colors — NO pure #000000
+   =================================================================== */
+[data-theme="dark"] {
+  --color-primary: #A8C7FA;
+  --color-primary-dark: #7CA8F9;
+  --color-on-primary: #062E6F;
+  --color-primary-container: #004A77;
+  --color-on-primary-container: #C3E7FF;
+
+  --color-secondary: #C4C7C5;
+  --color-on-secondary: #1F1F1F;
+  --color-secondary-container: #444746;
+  --color-on-secondary-container: #E3E3E3;
+
+  --color-tertiary: #4FD8EB;
+  --color-on-tertiary: #00363D;
+  --color-tertiary-container: #004F58;
+  --color-on-tertiary-container: #97F0FF;
+
+  /* M3 Dark surfaces — varying gray tones, never pure black */
+  --color-surface: #131314;
+  --color-surface-dim: #131314;
+  --color-surface-bright: #282A2C;
+  --color-surface-container-lowest: #000000;
+  --color-surface-container-low: #1E1F22;
+  --color-surface-container: #282A2C;
+  --color-surface-container-high: #303134;
+  --color-surface-container-highest: #3C4043;
+  --color-on-surface: #E3E3E3;
+  --color-on-surface-variant: #C4C7C5;
+  --color-outline: #444746;
+  --color-outline-variant: #444746;
+
+  --color-error: #F2B8B5;
+  --color-on-error: #601410;
+  --color-error-container: #8C1D18;
+  --color-on-error-container: #F9DEDC;
+  --color-success: #7DDC9A;
+  --color-success-container: #005321;
+  --color-on-success-container: #A8F5C1;
+  --color-warning: #F5C04A;
+  --color-warning-container: #5C4300;
+  --color-on-warning-container: #FFDEA6;
+
+  --color-inverse-surface: #E3E3E3;
+  --color-inverse-on-surface: #303134;
+  --color-inverse-primary: #0B57D0;
+
+  --color-background: #131314;
+  --color-foreground: #E3E3E3;
+}
+
+/* ===================================================================
+   Base Styles
+   =================================================================== */
+html {
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', 'Segoe UI', Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Desktop app selection bounds */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-/* Custom scrollbar for Neomorphic theme */
+input, textarea, [contenteditable] {
+  user-select: auto;
+  -webkit-user-select: auto;
+}
+
+/* ===================================================================
+   M3 Typography Scale Utilities
+   =================================================================== */
+.md-display-large { font-size: 57px; line-height: 64px; font-weight: 400; letter-spacing: -0.25px; }
+.md-display-medium { font-size: 45px; line-height: 52px; font-weight: 400; }
+.md-display-small { font-size: 36px; line-height: 44px; font-weight: 400; }
+.md-headline-large { font-size: 32px; line-height: 40px; font-weight: 400; }
+.md-headline-medium { font-size: 28px; line-height: 36px; font-weight: 400; }
+.md-headline-small { font-size: 24px; line-height: 32px; font-weight: 400; }
+.md-title-large { font-size: 22px; line-height: 28px; font-weight: 500; }
+.md-title-medium { font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; }
+.md-title-small { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.md-label-large { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.md-label-medium { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+.md-label-small { font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+.md-body-large { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0.5px; }
+.md-body-medium { font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: 0.25px; }
+.md-body-small { font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0.4px; }
+
+/* ===================================================================
+   M3 Elevation Surface Tint (applied via utility classes)
+   =================================================================== */
+.md-elevation-0 { box-shadow: none; }
+.md-elevation-1 { box-shadow: var(--shadow-elevation-1); }
+.md-elevation-2 { box-shadow: var(--shadow-elevation-2); }
+.md-elevation-3 { box-shadow: var(--shadow-elevation-3); }
+.md-elevation-4 { box-shadow: var(--shadow-elevation-4); }
+
+/* ===================================================================
+   Scrollbar Styling
+   =================================================================== */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #e0e5ec;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #bec3c9;
-  border-radius: 4px;
+  background: var(--color-outline-variant);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;
+  background: var(--color-outline);
+}
+
+/* ===================================================================
+   M3 State Layer Utilities
+   =================================================================== */
+.state-hover {
+  position: relative;
+}
+.state-hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.state-hover:hover::after {
+  opacity: 0.08;
+}
+.state-hover:active::after {
+  opacity: 0.12;
+}
+
+/* ===================================================================
+   Transition Utilities
+   =================================================================== */
+.md-transition {
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.md-transition-emphasized {
+  transition: all 0.5s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ===================================================================
+   Animation Keyframes
+   =================================================================== */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease forwards;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+/* ===================================================================
+   Legacy compat: glass-card and glass-panel fallback
+   These are used in some pages that aren't part of Phase 1.
+   They now map to M3 surface tokens.
+   =================================================================== */
+.glass-card {
+  background: var(--color-surface-container);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 12px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-card:hover {
+  background: var(--color-surface-container-high);
+  border-color: var(--color-outline);
+}
+
+.glass-panel {
+  background: var(--color-surface-container-highest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 12px;
+}
+
+.glass-dropdown {
+  background: var(--color-surface-container);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 12px;
+  box-shadow: var(--shadow-elevation-3);
 }

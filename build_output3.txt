@@ -1,0 +1,427 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please use 
+"proxy" instead. Learn 
+more: https://nextjs.or
+g/docs/messages/middlew
+are-to-proxy
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (ÔÜá The "midd   
+ le...leware-to-pro    
+xy:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  Creating an optimized production build ...
+Found 1 warning while 
+optimizing generated 
+CSS:
+
+[2mÔöé   }[22m
+[2mÔöé }[22m
+[2mÔöé[22m @import ur
+l('https://fonts.google
+apis.com/css2?family=Ro
+boto:wght@300;400;500;6
+00;700&display=swap');
+[2mÔöå[22m        
+[33m[2m^--[22m 
+@import rules must 
+precede all rules 
+aside from @charset 
+and @layer 
+statements[39m
+[2mÔöå[22m
+[2mÔöé 
+[data-theme="dark"] 
+{[22m
+[2mÔöé   
+--color-primary: 
+#D0BCFF;[22m
+
+Ô£ô Compiled successfully in 28.1s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+  Generating static pages using 7 workers (0/46) ...
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+  Generating static pages using 7 workers (11/46) 
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+  Generating static pages using 7 workers (22/46) 
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+  Generating static pages using 7 workers (34/46) 
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed 
+frames {
+  code: 'ECONNREFUSED'
+}
+Ô£ô Generating static pages using 7 workers (46/46) in 1925.4ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî Ôùï /
+Ôö£ Ôùï /_not-found
+Ôö£ ãÆ /api/activities
+Ôö£ ãÆ /api/activities/[entityId]
+Ôö£ ãÆ /api/auth/[...nextauth]
+Ôö£ ãÆ /api/auth/register
+Ôö£ ãÆ /api/bulk-import
+Ôö£ ãÆ /api/chat
+Ôö£ ãÆ /api/chat/[conversationId]
+Ôö£ ãÆ /api/companies
+Ôö£ ãÆ /api/companies/[id]
+Ôö£ ãÆ /api/contacts
+Ôö£ ãÆ /api/contacts/[id]
+Ôö£ ãÆ /api/contacts/[id]/timeline
+Ôö£ ãÆ /api/contacts/bulk
+Ôö£ ãÆ /api/custom-field-values
+Ôö£ ãÆ /api/custom-fields
+Ôö£ ãÆ /api/dashboard
+Ôö£ ãÆ /api/deals
+Ôö£ ãÆ /api/deals/[id]
+Ôö£ ãÆ /api/export
+Ôö£ ãÆ /api/notifications
+Ôö£ ãÆ /api/pipelines
+Ôö£ ãÆ /api/reports
+Ôö£ ãÆ /api/search
+Ôö£ ãÆ /api/seed
+Ôö£ ãÆ /api/tags
+Ôö£ ãÆ /api/tasks
+Ôö£ ãÆ /api/tasks/[id]
+Ôö£ ãÆ /api/users
+Ôö£ ãÆ /api/webhooks
+Ôö£ ãÆ /api/webhooks/[id]
+Ôö£ ãÆ /api/workflows
+Ôö£ ãÆ /api/workflows/[id]
+Ôö£ ãÆ /api/workspace/keys
+Ôö£ ãÆ /api/workspace/keys/[id]
+Ôö£ Ôùï /automation-hub
+Ôö£ Ôùï /automation-hub/api-keys
+Ôö£ Ôùï /automation-hub/automations
+Ôö£ Ôùï /automation-hub/integrations
+Ôö£ Ôùï /automation-hub/pipelines
+Ôö£ Ôùï /automation-hub/webhooks
+Ôö£ Ôùï /calendar
+Ôö£ Ôùï /chat
+Ôö£ ãÆ /contacts/[id]
+Ôö£ Ôùï /deals
+Ôö£ Ôùï /import
+Ôö£ Ôùï /leads
+Ôö£ Ôùï /leads/cold
+Ôö£ Ôùï /leads/warm
+Ôö£ Ôùï /login
+Ôö£ Ôùï /register
+Ôö£ Ôùï /reports
+Ôö£ Ôùï /settings
+Ôö£ Ôùï /settings/custom-fields
+Ôöö Ôùï /tasks
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+

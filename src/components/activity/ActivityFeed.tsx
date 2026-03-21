@@ -5,7 +5,9 @@ import { format } from "date-fns";
 import { useState } from "react";
 import NeoInput from "@/components/ui/NeoInput";
 import NeoButton from "@/components/ui/NeoButton";
-import { History, MessageSquare, PhoneCall, ListTodo } from "lucide-react";
+import RichTextEditor from "@/components/activity/RichTextEditor";
+import { History, MessageSquare, PhoneCall, ListTodo, CornerDownRight } from "lucide-react";
+import { fetchWithToken } from '@/lib/api';
 
 interface ActivityFeedProps {
   entityId: string;
@@ -15,11 +17,13 @@ interface ActivityFeedProps {
 export default function ActivityFeed({ entityId, entityType }: ActivityFeedProps) {
   const queryClient = useQueryClient();
   const [newNote, setNewNote] = useState("");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
 
   const { data: timeline, isLoading } = useQuery({
     queryKey: ["activities", entityId],
     queryFn: async () => {
-      const res = await fetch(`/api/activities/${entityId}`);
+      const res = await fetchWithToken(`/activities/${entityId}`);
       if (!res.ok) throw new Error("Failed to fetch timeline");
       return res.json();
     },
@@ -27,7 +31,7 @@ export default function ActivityFeed({ entityId, entityType }: ActivityFeedProps
   });
 
   const generateMutation = useMutation({
-    mutationFn: async (content: string) => {
+    mutationFn: async ({ content, parentId }: { content: string, parentId?: string }) => {
       const res = await fetch(`/api/activities/${entityId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -35,6 +39,7 @@ export default function ActivityFeed({ entityId, entityType }: ActivityFeedProps
           entityType,
           type: "NOTE",
           content,
+          parentId
         }),
       });
       if (!res.ok) throw new Error("Failed to post note");
@@ -43,12 +48,23 @@ export default function ActivityFeed({ entityId, entityType }: ActivityFeedProps
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["activities", entityId] });
       setNewNote("");
+      setReplyContent("");
+      setReplyingTo(null);
     },
   });
 
   const handlePostNote = () => {
-    if (newNote.trim()) {
-      generateMutation.mutate(newNote);
+    // Strip empty HTML tags
+    const cleanNote = newNote.replace(/<p><\/p>/g, "").trim();
+    if (cleanNote) {
+      generateMutation.mutate({ content: cleanNote });
+    }
+  };
+
+  const handlePostReply = (parentId: string) => {
+    const cleanNote = replyContent.replace(/<p><\/p>/g, "").trim();
+    if (cleanNote) {
+      generateMutation.mutate({ content: cleanNote, parentId });
     }
   };
 
@@ -92,9 +108,51 @@ export default function ActivityFeed({ entityId, entityType }: ActivityFeedProps
                     {format(new Date(item.timestamp), "MMM d, h:mm a")}
                   </span>
                 </div>
-                <p className={`text-sm ${item.isAudit ? "text-muted italic" : "text-foreground font-medium"}`}>
-                  {item.content}
-                </p>
+                <div className={`text-sm ${item.isAudit ? "text-muted italic" : "text-foreground font-medium"} prose prose-sm max-w-none`} dangerouslySetInnerHTML={{ __html: item.content }} />
+                
+                {!item.isAudit && (
+                  <div className="mt-3 border-t border-background/50 pt-2 flex items-center gap-4">
+                    <button 
+                      onClick={() => setReplyingTo(replyingTo === item.id ? null : item.id)}
+                      className="text-xs font-bold text-muted hover:text-primary transition-colors flex items-center gap-1"
+                    >
+                      <CornerDownRight size={14} /> Reply
+                    </button>
+                  </div>
+                )}
+                
+                {/* Render Replies */}
+                {item.replies && item.replies.length > 0 && (
+                  <div className="mt-4 space-y-3 pl-4 border-l-2 border-background/50">
+                    {item.replies.map((reply: any) => (
+                      <div key={reply.id} className="bg-background/30 rounded-lg p-3">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-bold text-foreground text-xs">{reply.user}</span>
+                          <span className="text-[10px] text-muted font-bold whitespace-nowrap">
+                            {format(new Date(reply.timestamp), "MMM d, h:mm a")}
+                          </span>
+                        </div>
+                        <div className="text-xs text-foreground font-medium prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: reply.content }} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Reply Input block */}
+                {replyingTo === item.id && (
+                  <div className="mt-3 pl-4 border-l-2 border-primary/20 space-y-2 animate-in fade-in slide-in-from-top-2">
+                    <RichTextEditor 
+                      content={replyContent} 
+                      onChange={setReplyContent} 
+                      onSubmit={() => handlePostReply(item.id)}
+                      placeholder={`Reply to ${item.user}...`}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <NeoButton variant="secondary" size="sm" onClick={() => setReplyingTo(null)}>Cancel</NeoButton>
+                      <NeoButton size="sm" onClick={() => handlePostReply(item.id)} disabled={!replyContent.trim() || generateMutation.isPending}>Reply</NeoButton>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))
@@ -105,17 +163,12 @@ export default function ActivityFeed({ entityId, entityType }: ActivityFeedProps
       <div className="p-4 bg-surface border-t-2 border-background shadow-neumorph-flat sticky bottom-0 z-10">
         <div className="flex items-end gap-3">
           <div className="flex-1">
-             <NeoInput
-               placeholder="Write a note..."
-               value={newNote}
-               onChange={(e) => setNewNote(e.target.value)}
-               onKeyDown={(e) => {
-                 if (e.key === "Enter" && !e.shiftKey) {
-                   e.preventDefault();
-                   handlePostNote();
-                 }
-               }}
-             />
+              <RichTextEditor 
+                content={newNote} 
+                onChange={setNewNote} 
+                onSubmit={handlePostNote}
+                placeholder="Write a note... Press Enter to post"
+              />
           </div>
           <NeoButton 
             onClick={handlePostNote}

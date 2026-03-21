@@ -1,0 +1,118 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please use 
+"proxy" instead. Learn 
+more: https://nextjs.or
+g/docs/messages/middlew
+are-to-proxy
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (ÔÜá The "midd   
+ le...leware-to-pro    
+xy:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  Creating an optimized production build ...
+Found 1 warning while 
+optimizing generated 
+CSS:
+
+[2mÔöé   }[22m
+[2mÔöé }[22m
+[2mÔöé[22m @import ur
+l('https://fonts.google
+apis.com/css2?family=Ro
+boto:wght@300;400;500;6
+00;700&display=swap');
+[2mÔöå[22m        
+[33m[2m^--[22m 
+@import rules must 
+precede all rules 
+aside from @charset 
+and @layer 
+statements[39m
+[2mÔöå[22m
+[2mÔöé 
+[data-theme="dark"] 
+{[22m
+[2mÔöé   
+--color-primary: 
+#D0BCFF;[22m
+
+Ô£ô Compiled successfully in 24.5s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/automation-hu
+b/api-keys/page.tsx:100
+:49
+Type error: Type 
+'"secondary"' is not 
+assignable to type 
+'"filled" | "tonal" | 
+"outlined" | "text" | 
+"danger" | "fab" | 
+undefined'.
+
+[0m [90m  98 |[39m  
+                 
+{newlyGeneratedKey}
+ [90m  99 |[39m      
+           [33m<[39m
+[33m/[39m[33mcode[39
+m[33m>[39m
+[31m[1m>[22m[39m[9
+0m 100 |[39m          
+       [33m<[39m[33m
+NeoButton[39m onClick
+[33m=[39m{handleCopy} 
+variant[33m=[39m[32m
+"secondary"[39m classN
+ame[33m=[39m[32m"px-
+3 shrink-0 flex 
+items-center 
+gap-2"[39m[33m>[39m
+ [90m     |[39m      
+                       
+                    
+[31m[1m^[22m[39m
+ [90m 101 |[39m      
+             {copied 
+[33m?[39m [33m<[39m
+[33mCheck[39m size[3
+3m=[39m{[35m16[39m} 
+className[33m=[39m[3
+2m"text-green-500"[39m
+ [35m/> : <Copy 
+size={16} 
+/[39m[33m>[39m} 
+ [90m 102 |[39m      
+             {copied 
+[33m?[39m 
+[32m"Copied"[39m 
+[33m:[39m 
+[32m"Copy"[39m}
+ [90m 103 |[39m      
+           [33m<[39m
+[33m/[39m[33mNeoButto
+n[39m[33m>[39m[0m
+Next.js build worker 
+exited with code: 1 
+and signal: null

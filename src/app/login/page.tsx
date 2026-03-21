@@ -1,34 +1,42 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { useAuth } from "@/store/useAuth";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: username, password }),
+      });
 
-    if (res?.error) {
-      setError("Invalid email or password");
+      if (!res.ok) {
+        setError("Invalid username or password");
+        setLoading(false);
+      } else {
+        const data = await res.json();
+        login(data.token, data.user);
+        router.push("/");
+      }
+    } catch {
+      setError("Network error");
       setLoading(false);
-    } else {
-      router.push("/");
-      router.refresh();
     }
   };
 
@@ -50,14 +58,14 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-foreground">Email</label>
+            <label className="text-sm font-bold text-foreground">Username</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full px-4 py-3 rounded-xl bg-surface shadow-neumorph-concave text-foreground font-medium placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30 transition-shadow"
-              placeholder="you@example.com"
+              placeholder="Enter your username"
             />
           </div>
 
@@ -81,13 +89,6 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-
-        <p className="text-center text-sm text-muted font-medium mt-6">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-primary font-bold hover:underline">
-            Create one
-          </Link>
-        </p>
       </div>
     </div>
   );

@@ -1,0 +1,19 @@
+﻿.next/dev/types/validator.ts(306,31): error TS2344: Type 'typeof import("C:/Users/Bella/Downloads/CRM/src/app/api/companies/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/companies/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ name: string; id: string; deletedAt: Date | null; createdAt: Date; updatedAt: Date; workspaceId: string; domain: string | null; industry: string | null; annualRevenue: Decimal | null; }> | NextResponse<...>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(306,31): error TS2344: Type 'typeof import("C:/Users/Bella/Downloads/CRM/src/app/api/companies/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/companies/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(req: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ name: string; id: string; deletedAt: Date | null; createdAt: Date; updatedAt: Date; workspaceId: string; domain: string | null; industry: string | null; annualRevenue: Decimal | null; }> | NextResponse<...>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+src/app/contacts/[id]/page.tsx(249,20): error TS2607: JSX element class does not support attributes because it does not have a 'props' property.
+src/app/contacts/[id]/page.tsx(249,21): error TS2786: 'History' cannot be used as a JSX component.
+  Its type '{ new (): History; prototype: History; }' is not a valid JSX element type.
+    Type '{ new (): History; prototype: History; }' is not assignable to type 'new (props: any, context: any) => Component<any, any, any>'.
+      Type 'History' is missing the following properties from type 'Component<any, any, any>': context, setState, forceUpdate, render, props

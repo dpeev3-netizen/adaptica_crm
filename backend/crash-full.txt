@@ -1,0 +1,17 @@
+C:\Users\Bella\Downloads\CRM\backend\src\controllers\webhooks.controller.ts:10
+const WebhookSchema = z.object({
+                      ^
+ReferenceError: z is not defined
+    at Object.<anonymous> (C:\Users\Bella\Downloads\CRM\backend\src\controllers\webhooks.controller.ts:10:23)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Module.m._compile (C:\Users\Bella\Downloads\CRM\backend\node_modules\ts-node\src\index.ts:1618:23)
+    at node:internal/modules/cjs/loader:1893:10
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Bella\Downloads\CRM\backend\node_modules\ts-node\src\index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+
+
+STDOUT:

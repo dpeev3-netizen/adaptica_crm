@@ -1,0 +1,11 @@
+src/controllers/notifications.controller.ts(6,30): error TS1003: Identifier expected.
+src/controllers/search.controller.ts(6,25): error TS1003: Identifier expected.
+src/controllers/workflows.controller.ts(64,6): error TS1005: ',' expected.
+src/controllers/workflows.controller.ts(65,13): error TS1005: ',' expected.
+src/controllers/workflows.controller.ts(66,3): error TS1005: ',' expected.
+src/controllers/workflows.controller.ts(67,7): error TS1005: ':' expected.
+src/controllers/workflows.controller.ts(68,11): error TS1005: ':' expected.
+src/controllers/workflows.controller.ts(68,45): error TS1005: ',' expected.
+src/controllers/workflows.controller.ts(83,3): error TS1128: Declaration or statement expected.
+src/controllers/workflows.controller.ts(83,5): error TS1005: 'try' expected.
+src/controllers/workflows.controller.ts(87,1): error TS1128: Declaration or statement expected.

@@ -48,14 +48,14 @@ import logger from "./logger";
 export function handleApiError(error: unknown) {
   if (error instanceof ZodError) {
     return NextResponse.json(
-      { error: "Validation error", details: error.errors },
+      { error: "Validation error", details: (error as any).errors },
       { status: 400 }
     );
   }
 
   if (error instanceof AppError) {
     if (!error.isOperational) {
-      logger.error("Programming or unknown error:", error);
+      logger.error({ err: error }, "Programming or unknown error");
     }
     return NextResponse.json(
       { error: error.message },
@@ -64,7 +64,7 @@ export function handleApiError(error: unknown) {
   }
 
   // Generic unhandled error
-  logger.error("Unhandled API exception:", error);
+  logger.error({ err: error }, "Unhandled API exception");
   return NextResponse.json(
     { error: "Internal Server Error" },
     { status: 500 }

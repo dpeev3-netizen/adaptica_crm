@@ -1,0 +1,113 @@
+﻿Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please use 
+"proxy" instead. Learn 
+more: https://nextjs.or
+g/docs/messages/middlew
+are-to-proxy
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (ÔÜá The "midd   
+ le...leware-to-pro    
+xy:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  Creating an optimized production build ...
+Found 1 warning while 
+optimizing generated 
+CSS:
+
+[2mÔöé   }[22m
+[2mÔöé }[22m
+[2mÔöé[22m @import ur
+l('https://fonts.google
+apis.com/css2?family=Ro
+boto:wght@300;400;500;6
+00;700&display=swap');
+[2mÔöå[22m        
+[33m[2m^--[22m 
+@import rules must 
+precede all rules 
+aside from @charset 
+and @layer 
+statements[39m
+[2mÔöå[22m
+[2mÔöé 
+[data-theme="dark"] 
+{[22m
+[2mÔöé   
+--color-primary: 
+#D0BCFF;[22m
+
+Ô£ô Compiled successfully in 21.8s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/settings/page
+.tsx:155:50
+Type error: Object 
+literal may only 
+specify known 
+properties, and 
+'ringOffsetColor' does 
+not exist in type 
+'Properties<string | 
+number, string & {}>'.
+
+[0m [90m 153 |[39m  
+                   
+onClick[33m=[39m{() 
+[33m=>[39m 
+setNewTagColor(c)}
+ [90m 154 |[39m      
+               classNam
+e[33m=[39m{[32m`w-7 
+h-7 rounded-full 
+transition-all 
+${newTagColor === c ? 
+"ring-2 ring-offset-2 
+ring-primary 
+scale-110" : "hover:sca
+le-110"}`[39m}
+[31m[1m>[22m[39m[9
+0m 155 |[39m          
+           
+style[33m=[39m{{ back
+groundColor[33m:[39m 
+c[33m,[39m ringOffset
+Color[33m:[39m [32m"
+var(--color-surface)"[
+39m }}
+ [90m     |[39m      
+                       
+                     
+[31m[1m^[22m[39m
+ [90m 156 |[39m      
+             
+[33m/[39m[33m>[39m
+ [90m 157 |[39m      
+           ))}
+ [90m 158 |[39m      
+         [33m<[39m[3
+3m/[39m[33mdiv[39m[
+33m>[39m[0m
+Next.js build worker 
+exited with code: 1 
+and signal: null

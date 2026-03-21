@@ -2,32 +2,50 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DataGrid, { ColumnDef } from "@/components/pipelines/DataGrid";
-import { format } from "date-fns";
-import NeoButton from "@/components/ui/NeoButton";
 import NeoModal from "@/components/ui/NeoModal";
-import { useState } from "react";
+import NeoButton from "@/components/ui/NeoButton";
+import { useState, useMemo } from "react";
+import { format } from "date-fns";
+import NeoInput from "@/components/ui/NeoInput";
 import NeoSlideOver from "@/components/ui/NeoSlideOver";
 import ActivityFeed from "@/components/activity/ActivityFeed";
-import CsvUploader from "@/components/CsvUploader";
-import { History, Upload, Eye } from "lucide-react";
+import LeadFormModal from "@/components/leads/LeadFormModal";
+import { History, Eye, Plus, Columns } from "lucide-react";
 import Link from "next/link";
+import { fetchWithToken } from '@/lib/api';
 
 export default function WarmLeadsPage() {
   const queryClient = useQueryClient();
+  const [leadFormOpen, setLeadFormOpen] = useState(false);
   const [slideOverOpen, setSlideOverOpen] = useState(false);
-  const [csvModalOpen, setCsvModalOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedContactName, setSelectedContactName] = useState<string>("");
 
-  const { data: contacts, isLoading } = useQuery({
-    queryKey: ["contacts-warm"],
+  const [addFieldModalOpen, setAddFieldModalOpen] = useState(false);
+  const [newFieldName, setNewFieldName] = useState("");
+  const [newFieldType, setNewFieldType] = useState("TEXT");
+
+  const { data: customFields } = useQuery({
+    queryKey: ["custom-fields", "CONTACT"],
     queryFn: async () => {
-      const res = await fetch("/api/contacts");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const json = await res.json();
-      return json.filter((c: any) => c.type === "WARM");
+      const res = await fetchWithToken('/custom-fields?entityType=CONTACT');
+      if (!res.ok) throw new Error("Failed to fetch custom fields");
+      return res.json();
     },
   });
+
+  const { data: allContacts, isLoading } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: async () => {
+      const res = await fetchWithToken('/contacts');
+      if (!res.ok) throw new Error("Failed to fetch contacts");
+      return res.json();
+    },
+  });
+
+  const contacts = useMemo(() => {
+    return allContacts?.filter((c: any) => c.type === "WARM") || [];
+  }, [allContacts]);
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, key, value }: { id: string; key: string; value: any }) => {
@@ -40,12 +58,72 @@ export default function WarmLeadsPage() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["contacts-warm"] });
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+
+  const customFieldMutation = useMutation({
+    mutationFn: async ({ entityId, fieldId, value, type }: any) => {
+      const res = await fetch("/api/custom-field-values", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entityId, fieldId, value, type }),
+      });
+      if (!res.ok) throw new Error("Failed to save custom field");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+
+  const bulkMutation = useMutation({
+    mutationFn: async ({ action, ids, data }: { action: "delete" | "update"; ids: string[]; data?: any }) => {
+      const res = await fetch("/api/contacts/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ids, data }),
+      });
+      if (!res.ok) throw new Error("Bulk operation failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+  });
+
+  const addFieldMutation = useMutation({
+    mutationFn: async ({ name, type }: { name: string, type: string }) => {
+      const res = await fetch("/api/custom-fields", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entityType: "CONTACT", name, type }),
+      });
+      if (!res.ok) throw new Error("Failed to create custom field");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-fields", "CONTACT"] });
+      setAddFieldModalOpen(false);
+      setNewFieldName("");
+      setNewFieldType("TEXT");
     },
   });
 
   const handleEdit = async (id: string, key: any, value: any) => {
-    await updateMutation.mutateAsync({ id, key, value });
+    const standardFields = ["name", "email", "phone", "status", "followUpDate"];
+
+    if (standardFields.includes(key)) {
+      await updateMutation.mutateAsync({ id, key, value });
+    } else {
+      const fieldDef = customFields?.find((f: any) => f.id === key);
+      if (fieldDef) {
+        await customFieldMutation.mutateAsync({ entityId: id, fieldId: key, value, type: fieldDef.type });
+      }
+    }
   };
 
   const columns: ColumnDef<any>[] = [
@@ -103,35 +181,98 @@ export default function WarmLeadsPage() {
           </NeoButton>
         </div>
       )
-    }
+    },
+    ...(customFields || []).map((field: any) => ({
+      id: field.id,
+      header: field.name,
+      accessorKey: field.id,
+      editable: true,
+      type: field.type === "NUMBER" ? "number" : field.type === "DATE" ? "date" : field.type === "DROPDOWN" ? "select" : "text",
+      options: field.options ? JSON.parse(field.options) : undefined,
+    })) as ColumnDef<any>[],
   ];
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin w-8 h-8 rounded-full border-4 border-primary border-t-transparent shadow-neumorph-pressed"></div>
+        <div className="animate-spin w-8 h-8 rounded-full border-4 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-in-out">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+      <div className="flex max-md:flex-col items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground drop-shadow-sm">Warm Leads</h1>
-          <p className="text-muted font-medium mt-1">Manage highly engaged contacts progressing to deals.</p>
+          <h1 className="text-3xl font-bold text-white drop-shadow-md">Warm Leads</h1>
+          <p className="text-muted font-medium mt-1">Manage your warm contacts and qualified opportunities.</p>
         </div>
-        <NeoButton onClick={() => setCsvModalOpen(true)} className="flex items-center gap-2">
-          <Upload size={18} /> Import CSV
-        </NeoButton>
+        
+        <div className="flex items-center gap-3">
+          <NeoButton variant="secondary" onClick={() => setAddFieldModalOpen(true)} className="flex items-center gap-2">
+            <Columns size={18} /> Add Field
+          </NeoButton>
+          <NeoButton onClick={() => setLeadFormOpen(true)} className="flex items-center gap-2">
+            <Plus size={18} /> Add Lead
+          </NeoButton>
+        </div>
       </div>
 
       <DataGrid
-        data={contacts || []}
+        data={contacts}
         columns={columns}
         rowKey="id"
         onEdit={handleEdit}
+        massActions={[
+          {
+            label: "Delete",
+            variant: "ghost",
+            onClick: (ids) => {
+              if (confirm(`Are you sure you want to delete ${ids.length} leads?`)) {
+                bulkMutation.mutate({ action: "delete", ids });
+              }
+            }
+          },
+          {
+            label: "Mark Lost",
+            variant: "secondary",
+            onClick: (ids) => bulkMutation.mutate({ action: "update", ids, data: { status: "LOST" } })
+          }
+        ]}
       />
+
+      <LeadFormModal 
+        isOpen={leadFormOpen} 
+        onClose={() => setLeadFormOpen(false)} 
+        defaultType="WARM"
+      />
+
+      <NeoModal isOpen={addFieldModalOpen} onClose={() => setAddFieldModalOpen(false)} title="Add Custom Field">
+        <form 
+          onSubmit={(e) => { 
+            e.preventDefault(); 
+            addFieldMutation.mutate({ name: newFieldName, type: newFieldType }); 
+          }} 
+          className="flex flex-col gap-4"
+        >
+          <div>
+            <label className="text-sm font-bold text-muted mb-1 block">Field Name</label>
+            <NeoInput required value={newFieldName} onChange={(e) => setNewFieldName(e.target.value)} placeholder="E.g. Lead Source" />
+          </div>
+          <div>
+            <label className="text-sm font-bold text-muted mb-1 block">Field Type</label>
+            <select value={newFieldType} onChange={(e) => setNewFieldType(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-[#0B0C10]/50 border border-white/10 text-white focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all font-medium">
+              <option value="TEXT" className="bg-[#12141C]">Text</option>
+              <option value="NUMBER" className="bg-[#12141C]">Number</option>
+              <option value="DATE" className="bg-[#12141C]">Date</option>
+              <option value="BOOLEAN" className="bg-[#12141C]">Checkbox (Boolean)</option>
+            </select>
+          </div>
+          <NeoButton type="submit" disabled={addFieldMutation.isPending} className="mt-4">
+            {addFieldMutation.isPending ? "Adding..." : "Add Column"}
+          </NeoButton>
+        </form>
+      </NeoModal>
 
       <NeoSlideOver
         isOpen={slideOverOpen}
@@ -143,10 +284,6 @@ export default function WarmLeadsPage() {
           <ActivityFeed entityId={selectedContactId} entityType="CONTACT" />
         )}
       </NeoSlideOver>
-
-      <NeoModal isOpen={csvModalOpen} onClose={() => setCsvModalOpen(false)} title="Import Warm Leads">
-        <CsvUploader />
-      </NeoModal>
     </div>
   );
 }

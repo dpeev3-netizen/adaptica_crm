@@ -1,0 +1,1 @@
+﻿src/app/api/custom-fields/route.ts(31,72): error TS2339: Property 'user' does not exist on type '{ userId: string; workspaceId: string; role: string; }'.

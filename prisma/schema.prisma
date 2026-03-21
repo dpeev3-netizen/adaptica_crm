@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -80,12 +81,18 @@ enum BillingPlan {
   ENTERPRISE
 }
 
+enum LeadType {
+  COLD
+  WARM
+}
+
 // ==== CORE TENANT MODELS ====
 
 model User {
   id           String  @id @default(uuid())
   name         String
-  email        String  @unique
+  username     String  @unique
+  email        String?
   passwordHash String
   avatar       String?
   role         Role    @default(USER) // Global role
@@ -95,11 +102,11 @@ model User {
 
   activities       Activity[]
   auditLogs        AuditLog[]
-  sentMessages     ChatMessage[]  @relation("SentMessages")
-  receivedMessages ChatMessage[]  @relation("ReceivedMessages")
+  chatMessages     ChatMessage[]
+  reactions        MessageReaction[]
+  channelMembers   ChannelMember[]
   notifications    Notification[]
-  conversationsAsA Conversation[] @relation("UserA")
-  conversationsAsB Conversation[] @relation("UserB")
+  connectedAccounts ConnectedAccount[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -128,8 +135,11 @@ model Workspace {
   leadStatuses  LeadStatus[]
   activities    Activity[]
   auditLogs     AuditLog[]
-  conversations Conversation[]
+  channels      Channel[]
   notifications Notification[]
+  attachments   Attachment[]
+  webhooks      Webhook[]
+  connectedAccounts ConnectedAccount[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -187,9 +197,10 @@ model Company {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  name     String
-  domain   String?
-  industry String?
+  name          String
+  domain        String?
+  industry      String?
+  annualRevenue Decimal?
 
   contacts Contact[]
   deals    Deal[]
@@ -228,6 +239,7 @@ model Contact {
   statusId     String?
   status       LeadStatus? @relation(fields: [statusId], references: [id], onDelete: SetNull)
   followUpDate DateTime?
+  type         LeadType    @default(COLD)
 
   deals Deal[]
   tags  Tag[]
@@ -262,6 +274,10 @@ model Stage {
   name       String
   order      Int
   color      String   @default("#4a90e2")
+  
+  wipLimit   Int?     // Limit number of active deals allowed in this stage
+  slaDays    Int?     // Expected maximum days a deal should stay in this stage
+  
   deals      Deal[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -299,6 +315,9 @@ model CustomField {
   name       String
   type       CustomFieldType // TEXT, NUMBER, DATE, DROPDOWN, BOOLEAN
   options    String? // JSON array string for DROPDOWN options
+  
+  permissions     Json?   // RBAC specific permissions, e.g. ["ADMIN", "MANAGER"]
+  computedFormula String? // For computed fields, string representation of derivations
 
   values CustomFieldValue[]
 
@@ -352,6 +371,35 @@ model WorkflowAction {
   createdAt  DateTime   @default(now())
 }
 
+model Webhook {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  url         String
+  secret      String?
+  events      Json      // Array of event strings
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ConnectedAccount {
+  id             String    @id @default(uuid())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       String    // e.g. "GOOGLE", "MICROSOFT"
+  accessToken    String
+  refreshToken   String?
+  expiresAt      DateTime?
+  email          String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([workspaceId, provider, email])
+}
+
 model Activity {
   id          String    @id @default(uuid())
   workspaceId String
@@ -367,8 +415,31 @@ model Activity {
   status     ActivityStatus   @default(PENDING)
   dueDate    DateTime?
 
+  parentId   String?          // Self-relation for threaded replies
+  parent     Activity?        @relation("ActivityThread", fields: [parentId], references: [id], onDelete: SetNull)
+  children   Activity[]       @relation("ActivityThread")
+
+  hasAttachments Boolean      @default(false)
+  attachments    Attachment[] // Files associated with this activity or note
+
   deletedAt DateTime?
   timestamp DateTime  @default(now())
+}
+
+model Attachment {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  activityId  String
+  activity    Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  
+  fileName    String
+  fileUrl     String
+  fileSize    Int
+  mimeType    String
+  
+  createdAt   DateTime  @default(now())
 }
 
 model Tag {
@@ -397,36 +468,71 @@ model AuditLog {
   timestamp DateTime @default(now())
 }
 
-model Conversation {
+model Channel {
   id          String    @id @default(uuid())
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  userAId  String
-  userA    User          @relation("UserA", fields: [userAId], references: [id])
-  userBId  String
-  userB    User          @relation("UserB", fields: [userBId], references: [id])
-  messages ChatMessage[]
+  name        String
+  description String?
+  members     ChannelMember[]
+  messages    ChatMessage[]
 
   deletedAt DateTime?
   updatedAt DateTime  @updatedAt
   createdAt DateTime  @default(now())
 
-  // Note: Uniqueness might be scoped to workspace if users can be in multiple workspaces and have isolated chats
-  @@unique([workspaceId, userAId, userBId])
+  @@unique([workspaceId, name])
+}
+
+model ChannelMember {
+  id        String  @id @default(uuid())
+  channelId String
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lastRead  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@unique([channelId, userId])
 }
 
 model ChatMessage {
-  id             String       @id @default(uuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderId       String
-  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
-  receiverId     String
-  receiver       User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  content        String
-  read           Boolean      @default(false)
-  timestamp      DateTime     @default(now())
+  id        String  @id @default(uuid())
+  channelId String
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User    @relation(fields: [senderId], references: [id])
+  content   String
+
+  // Threading — reply to another message
+  parentId  String?
+  parent    ChatMessage?  @relation("MessageThread", fields: [parentId], references: [id], onDelete: SetNull)
+  replies   ChatMessage[] @relation("MessageThread")
+
+  // File/image attachment (optional)
+  fileUrl   String?
+  fileName  String?
+  fileType  String?
+  fileSize  Int?
+
+  reactions MessageReaction[]
+
+  timestamp DateTime @default(now())
+}
+
+model MessageReaction {
+  id        String      @id @default(uuid())
+  messageId String
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String
+
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId, emoji])
 }
 
 model Notification {

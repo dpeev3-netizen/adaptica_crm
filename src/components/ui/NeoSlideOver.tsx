@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { X } from "lucide-react";
 
 interface NeoSlideOverProps {
@@ -18,29 +18,42 @@ export default function NeoSlideOver({
   subtitle,
   children,
 }: NeoSlideOverProps) {
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      {/* Backdrop */}
+      {/* M3 Scrim */}
       <div
-        className="absolute inset-0 bg-background/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-on-surface/30 animate-fade-in"
         onClick={onClose}
       />
 
-      {/* SlideOver Panel */}
-      <div className="relative w-full max-w-md h-full bg-surface shadow-neumorph-flat animate-in fade-in slide-in-from-right-full duration-300 flex flex-col pointer-events-auto">
+      {/* M3 Side Sheet */}
+      <div className="relative w-full max-w-md h-full bg-surface-container flex flex-col pointer-events-auto shadow-[var(--shadow-elevation-4)] animate-slide-up-fade">
         {/* Header */}
-        <div className="px-6 py-5 border-b-2 border-background/50 flex items-start justify-between">
+        <div className="px-6 py-5 border-b border-outline-variant flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-black text-foreground drop-shadow-sm tracking-tight pr-4">
+            <h2 className="md-title-large text-on-surface pr-4">
               {title}
             </h2>
-            {subtitle && <p className="text-sm font-medium text-muted mt-1">{subtitle}</p>}
+            {subtitle && <p className="md-body-medium text-on-surface-variant mt-1">{subtitle}</p>}
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full flex items-center justify-center text-muted hover:text-danger shadow-neumorph-flat-sm active:shadow-neumorph-pressed transition-all duration-200"
+            className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/8 transition-colors"
           >
             <X size={20} />
           </button>
