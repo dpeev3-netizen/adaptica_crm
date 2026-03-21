@@ -5,6 +5,7 @@ import NeoModal from "@/components/ui/NeoModal";
 import NeoInput from "@/components/ui/NeoInput";
 import NeoButton from "@/components/ui/NeoButton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchWithToken } from "@/lib/api";
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -24,9 +25,8 @@ export default function LeadFormModal({ isOpen, onClose, defaultType = "COLD" }:
 
   const mutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const res = await fetch("/api/contacts", {
+      const res = await fetchWithToken("/contacts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
       if (!res.ok) {
