@@ -29,6 +29,7 @@ interface DataGridProps<T> {
   onEdit?: (id: string, key: keyof T, value: any) => Promise<void>;
   rowKey: keyof T;
   massActions?: MassAction[];
+  isLoading?: boolean;
 }
 
 export default function DataGrid<T extends Record<string, any>>({
@@ -37,6 +38,7 @@ export default function DataGrid<T extends Record<string, any>>({
   onEdit,
   rowKey,
   massActions,
+  isLoading = false,
 }: DataGridProps<T>) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
@@ -252,7 +254,22 @@ export default function DataGrid<T extends Record<string, any>>({
             )}
           </thead>
           <tbody>
-            {processedData.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={`skeleton-${i}`} className="border-none animate-pulse">
+                  {massActions && (
+                    <td className="px-3 py-3">
+                      <div className="w-[18px] h-[18px] rounded bg-surface-container-highest"></div>
+                    </td>
+                  )}
+                  {activeColumns.map(col => (
+                    <td key={`skel-col-${col.id}`} className="px-3 py-3">
+                      <div className="h-5 w-3/4 bg-surface-container-highest rounded-md"></div>
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : processedData.length === 0 ? (
               <tr>
                 <td colSpan={activeColumns.length + (massActions ? 1 : 0)} className="p-12 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">

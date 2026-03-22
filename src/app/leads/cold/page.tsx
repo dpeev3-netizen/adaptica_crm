@@ -14,6 +14,7 @@ import LeadFormModal from "@/components/leads/LeadFormModal";
 import { History, Upload, Eye, Plus, Columns } from "lucide-react";
 import Link from "next/link";
 import { fetchWithToken } from '@/lib/api';
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const STAGES = [
   { label: "Cold Lead", value: "COLD_LEAD" },
@@ -239,13 +240,7 @@ export default function ColdLeadsPage() {
     })) as ColumnDef<any>[],
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin w-8 h-8 rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="space-y-5 animate-fade-in pb-12">
@@ -295,39 +290,42 @@ export default function ColdLeadsPage() {
         ))}
       </div>
 
-      <DataGrid
-        data={contacts}
-        columns={columns}
-        rowKey="id"
-        onEdit={handleEdit}
-        massActions={[
-          {
-            label: "Delete",
-            variant: "danger",
-            onClick: (ids) => {
-              if (confirm(`Are you sure you want to delete ${ids.length} leads?`)) {
-                bulkMutation.mutate({ action: "delete", ids });
+      <ErrorBoundary>
+        <DataGrid
+          data={contacts}
+          columns={columns}
+          rowKey="id"
+          onEdit={handleEdit}
+          isLoading={isLoading}
+          massActions={[
+            {
+              label: "Delete",
+              variant: "danger",
+              onClick: (ids) => {
+                if (confirm(`Are you sure you want to delete ${ids.length} leads?`)) {
+                  bulkMutation.mutate({ action: "delete", ids });
+                }
               }
-            }
-          },
-          {
-            label: "Next Stage",
-            variant: "tonal",
-            onClick: (ids) => {
-              const currentIndex = STAGES.findIndex(s => s.value === activeStage);
-              const nextStage = STAGES[Math.min(currentIndex + 1, STAGES.length - 1)];
-              if (nextStage.value !== activeStage) {
-                bulkMutation.mutate({ action: "update", ids, data: { status: nextStage.value } });
+            },
+            {
+              label: "Next Stage",
+              variant: "tonal",
+              onClick: (ids) => {
+                const currentIndex = STAGES.findIndex(s => s.value === activeStage);
+                const nextStage = STAGES[Math.min(currentIndex + 1, STAGES.length - 1)];
+                if (nextStage.value !== activeStage) {
+                  bulkMutation.mutate({ action: "update", ids, data: { status: nextStage.value } });
+                }
               }
+            },
+            {
+              label: "Mark Lost",
+              variant: "text",
+              onClick: (ids) => bulkMutation.mutate({ action: "update", ids, data: { status: "LOST" } })
             }
-          },
-          {
-            label: "Mark Lost",
-            variant: "text",
-            onClick: (ids) => bulkMutation.mutate({ action: "update", ids, data: { status: "LOST" } })
-          }
-        ]}
-      />
+          ]}
+        />
+      </ErrorBoundary>
 
       <LeadFormModal
         isOpen={leadFormOpen}

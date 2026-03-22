@@ -10,6 +10,7 @@ import { CheckCircle2, Circle, Plus, Calendar, Flag, Trash2 } from "lucide-react
 import { format, isToday, isPast, isFuture } from "date-fns";
 import { toast } from "sonner";
 import { fetchWithToken } from '@/lib/api';
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const FILTERS = [
   { id: "all", label: "All Tasks" },
@@ -137,78 +138,80 @@ export default function TasksPage() {
       </div>
 
       {/* Task List */}
-      <div className="space-y-3">
-        {tasks?.length === 0 ? (
-          <NeoCard variant="outlined" className="p-8 text-center text-on-surface-variant font-medium bg-surface-container">
-            No tasks found for this filter.
-          </NeoCard>
-        ) : (
-          tasks?.map((task: any) => (
-            <NeoCard
-              variant="outlined"
-              key={task.id}
-              className={`flex items-center gap-4 p-4 group hover:-translate-y-1 hover:shadow-md transition-all duration-300 ${
-                task.status === "COMPLETED" ? "opacity-60 bg-surface-container-highest" : "bg-surface"
-              }`}
-            >
-              <button
-                onClick={() => toggleMutation.mutate({ id: task.id, status: task.status })}
-                className="shrink-0 transition-colors"
-              >
-                {task.status === "COMPLETED" ? (
-                  <CheckCircle2 size={24} className="text-success" />
-                ) : (
-                  <Circle size={24} className="text-on-surface-variant hover:text-primary" />
-                )}
-              </button>
-
-              <div className="flex-1 min-w-0">
-                <p className={`md-title-medium ${task.status === "COMPLETED" ? "line-through text-on-surface-variant" : "text-on-surface"}`}>
-                  {task.content}
-                </p>
-                <div className="flex items-center gap-3 mt-1 flex-wrap">
-                  <span className="md-label-small flex items-center gap-1 text-on-surface-variant">
-                    Added: {format(new Date(task.timestamp || task.createdAt || Date.now()), "MMM d, yyyy h:mm a")}
-                  </span>
-                  {task.dueDate && (
-                    <span className={`md-label-small flex items-center gap-1 ${
-                      isPast(new Date(task.dueDate)) && task.status === "PENDING"
-                        ? "text-error"
-                        : isToday(new Date(task.dueDate))
-                        ? "text-primary"
-                        : "text-on-surface-variant"
-                    }`}>
-                      <Calendar size={12} />
-                      Due {format(new Date(task.dueDate), "MMM d, yyyy h:mm a")}
-                    </span>
-                  )}
-                  <span className={`md-label-small flex items-center gap-1 ${PRIORITY_COLORS[task.priority]}`}>
-                    <Flag size={12} />
-                    {task.priority}
-                  </span>
-                  
-                  {task.assignees && task.assignees.length > 0 && (
-                     <div className="flex -space-x-1 mt-1">
-                        {task.assignees.map((u: any) => (
-                           <div key={u.id} className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[9px] font-bold text-on-primary border border-surface shadow-sm" title={u.name}>
-                              {u.name.substring(0,2).toUpperCase()}
-                           </div>
-                        ))}
-                     </div>
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={() => deleteMutation.mutate(task.id)}
-                className="opacity-0 group-hover:opacity-100 text-on-surface-variant hover:text-error transition-all p-2"
-              >
-                <Trash2 size={16} />
-              </button>
+      <ErrorBoundary>
+        <div className="space-y-3">
+          {tasks?.length === 0 ? (
+            <NeoCard variant="outlined" className="p-8 text-center text-on-surface-variant font-medium bg-surface-container">
+              No tasks found for this filter.
             </NeoCard>
-          ))
-        )}
-      </div>
+          ) : (
+            tasks?.map((task: any) => (
+              <NeoCard
+                variant="outlined"
+                key={task.id}
+                className={`flex items-center gap-4 p-4 group hover:-translate-y-1 hover:shadow-md transition-all duration-300 ${
+                  task.status === "COMPLETED" ? "opacity-60 bg-surface-container-highest" : "bg-surface"
+                }`}
+              >
+                <button
+                  onClick={() => toggleMutation.mutate({ id: task.id, status: task.status })}
+                  className="shrink-0 transition-colors"
+                >
+                  {task.status === "COMPLETED" ? (
+                    <CheckCircle2 size={24} className="text-success" />
+                  ) : (
+                    <Circle size={24} className="text-on-surface-variant hover:text-primary" />
+                  )}
+                </button>
+
+                <div className="flex-1 min-w-0">
+                  <p className={`md-title-medium ${task.status === "COMPLETED" ? "line-through text-on-surface-variant" : "text-on-surface"}`}>
+                    {task.content || "Empty Task"}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    <span className="md-label-small flex items-center gap-1 text-on-surface-variant">
+                      Added: {format(new Date(task.timestamp || task.createdAt || Date.now()), "MMM d, yyyy h:mm a")}
+                    </span>
+                    {task.dueDate && (
+                      <span className={`md-label-small flex items-center gap-1 ${
+                        isPast(new Date(task.dueDate)) && task.status === "PENDING"
+                          ? "text-error"
+                          : isToday(new Date(task.dueDate))
+                          ? "text-primary"
+                          : "text-on-surface-variant"
+                      }`}>
+                        <Calendar size={12} />
+                        Due {format(new Date(task.dueDate), "MMM d, yyyy h:mm a")}
+                      </span>
+                    )}
+                    <span className={`md-label-small flex items-center gap-1 ${PRIORITY_COLORS[task.priority]}`}>
+                      <Flag size={12} />
+                      {task.priority || "MEDIUM"}
+                    </span>
+                    
+                    {task.assignees && task.assignees.length > 0 && (
+                       <div className="flex -space-x-1 mt-1">
+                          {task.assignees.map((u: any) => (
+                             <div key={u.id} className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[9px] font-bold text-on-primary border border-surface shadow-sm" title={u.name}>
+                               {u.name ? u.name.substring(0,2).toUpperCase() : "?"}
+                             </div>
+                          ))}
+                       </div>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => deleteMutation.mutate(task.id)}
+                  className="opacity-0 group-hover:opacity-100 text-on-surface-variant hover:text-error transition-all p-2"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </NeoCard>
+            ))
+          )}
+        </div>
+      </ErrorBoundary>
 
       {/* Create Task Modal */}
       <NeoModal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="New Task">

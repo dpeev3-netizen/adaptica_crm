@@ -32,8 +32,15 @@ export default function Providers({ children }: { children: ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000,
+            retry: 1,
+            retryDelay: 2000,
+            networkMode: 'online',
+            staleTime: 60000,
           },
+          mutations: {
+            retry: 0,
+            networkMode: 'online',
+          }
         },
       })
   );
