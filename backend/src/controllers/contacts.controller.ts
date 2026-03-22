@@ -99,16 +99,19 @@ export const updateContact = async (req: Request, res: Response) => {
     const contact = await prisma.contact.findUnique({ where: { id, workspaceId } });
     if (!contact) return res.status(404).json({ error: "Contact not found" });
 
+    // Handle string status payload from frontend
+    let incomingStatus = typeof updateData.status === "string" ? updateData.status.toLowerCase().trim() : null;
+
     // Pipeline Automations (State Machine)
     
     // Rule 1: Cold to Warm
-    if (contact.type === "COLD" && updateData.status === "BOOKED") {
+    if (contact.type === "COLD" && incomingStatus === "booked") {
       updateData.type = "WARM";
-      updateData.status = "STEADY";
+      incomingStatus = "steady";
     }
 
     // Rule 3: Warm to Deal
-    if (contact.type === "WARM" && updateData.status === "NEXT_CHAPTER") {
+    if (contact.type === "WARM" && incomingStatus === "next chapter") {
       // Find or create 'Negotiating' stage
       let stage = await prisma.stage.findFirst({
         where: { pipeline: { workspaceId }, name: "Negotiating" }
@@ -133,8 +136,29 @@ export const updateContact = async (req: Request, res: Response) => {
             }
         });
       }
-      // Optionally mark contact as moved
-      updateData.status = "MOVED_TO_DEAL";
+      // Mark contact as moved
+      incomingStatus = "moved to deal";
+    }
+
+    // Map String back to Prisma relational `statusId`
+    if (incomingStatus) {
+       let leadStatus = await prisma.leadStatus.findFirst({
+          where: { workspaceId, name: { equals: incomingStatus, mode: "insensitive" } }
+       });
+       if (!leadStatus) {
+          // Fallback create it if missing so we don't crash the relation
+          leadStatus = await prisma.leadStatus.create({
+             data: { 
+               workspaceId, 
+               name: incomingStatus
+                 .split(' ')
+                 .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                 .join(' ') 
+             }
+          });
+       }
+       updateData.statusId = leadStatus.id;
+       delete updateData.status; // Remove the raw string to prevent Prisma relation crash
     }
 
     const updated = await prisma.contact.update({
@@ -172,14 +196,15 @@ export const bulkContacts = async (req: Request, res: Response) => {
           if (!contact) continue;
 
           let updateData = { ...data };
+          let incomingStatus = typeof updateData.status === "string" ? updateData.status.toLowerCase().trim() : null;
 
           // Rule 1
-          if (contact.type === "COLD" && updateData.status === "BOOKED") {
+          if (contact.type === "COLD" && incomingStatus === "booked") {
              updateData.type = "WARM";
-             updateData.status = "STEADY";
+             incomingStatus = "steady";
           }
           // Rule 3
-          if (contact.type === "WARM" && updateData.status === "NEXT_CHAPTER") {
+          if (contact.type === "WARM" && incomingStatus === "next chapter") {
              let stage = await prisma.stage.findFirst({ where: { pipeline: { workspaceId }, name: "Negotiating" } });
              if (!stage) {
                  const pipeline = await prisma.pipeline.findFirst({ where: { workspaceId }});
@@ -190,7 +215,20 @@ export const bulkContacts = async (req: Request, res: Response) => {
                      data: { workspaceId: workspaceId as string, title: `${contact.name} Deal`, contactId: contact.id, stageId: stage.id, value: 0 }
                  });
              }
-             updateData.status = "MOVED_TO_DEAL";
+             incomingStatus = "moved to deal";
+          }
+
+          if (incomingStatus) {
+             let leadStatus = await prisma.leadStatus.findFirst({
+                where: { workspaceId, name: { equals: incomingStatus, mode: "insensitive" } }
+             });
+             if (!leadStatus) {
+                leadStatus = await prisma.leadStatus.create({
+                   data: { workspaceId, name: incomingStatus.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') }
+                });
+             }
+             updateData.statusId = leadStatus.id;
+             delete updateData.status;
           }
 
           await prisma.contact.update({

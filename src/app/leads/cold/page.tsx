@@ -17,16 +17,16 @@ import { fetchWithToken } from '@/lib/api';
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const STAGES = [
-  { label: "Cold Lead", value: "COLD_LEAD" },
-  { label: "Didn't Pick Up", value: "DIDNT_PICK_UP" },
-  { label: "Booked", value: "BOOKED" },
-  { label: "Call Later", value: "CALL_LATER" },
-  { label: "Lost", value: "LOST" },
+  { label: "Cold Lead", value: "Cold Lead" },
+  { label: "Didn't Pick Up", value: "Didn't Pick Up" },
+  { label: "Booked", value: "Booked" },
+  { label: "Call Later", value: "Call Later" },
+  { label: "Lost", value: "Lost" },
 ];
 
 export default function ColdLeadsPage() {
   const queryClient = useQueryClient();
-  const [activeStage, setActiveStage] = useState("COLD_LEAD");
+  const [activeStage, setActiveStage] = useState("Cold Lead");
   const [modalOpen, setModalOpen] = useState(false);
   const [csvModalOpen, setCsvModalOpen] = useState(false);
   const [leadFormOpen, setLeadFormOpen] = useState(false);
@@ -63,9 +63,9 @@ export default function ColdLeadsPage() {
     const knownStatuses = STAGES.map(s => s.value);
 
     return coldContacts.filter((c: any) => {
-      const status = c.status || "COLD_LEAD";
-      if (activeStage === "COLD_LEAD") {
-        return status === "COLD_LEAD" || !knownStatuses.includes(status);
+      const status = c.status || "Cold Lead";
+      if (activeStage === "Cold Lead") {
+        return status === "Cold Lead" || !knownStatuses.includes(status);
       }
       return status === activeStage;
     });
@@ -137,7 +137,7 @@ export default function ColdLeadsPage() {
     const standardFields = ["name", "email", "phone", "status", "followUpDate"];
 
     if (standardFields.includes(key)) {
-      if (key === "status" && value === "CALL_LATER") {
+      if (key === "status" && value === "Call Later") {
         setSelectedContactId(id);
         setModalOpen(true);
       }
@@ -172,11 +172,11 @@ export default function ColdLeadsPage() {
     const counts: Record<string, number> = {};
     STAGES.forEach(s => { counts[s.value] = 0; });
     coldContacts.forEach((c: any) => {
-      const status = c.status || "COLD_LEAD";
+      const status = c.status || "Cold Lead";
       if (knownStatuses.includes(status)) {
         counts[status]++;
       } else {
-        counts["COLD_LEAD"]++;
+        counts["Cold Lead"]++;
       }
     });
     return counts;
@@ -321,7 +321,7 @@ export default function ColdLeadsPage() {
             {
               label: "Mark Lost",
               variant: "text",
-              onClick: (ids) => bulkMutation.mutate({ action: "update", ids, data: { status: "LOST" } })
+              onClick: (ids) => bulkMutation.mutate({ action: "update", ids, data: { status: "Lost" } })
             }
           ]}
         />

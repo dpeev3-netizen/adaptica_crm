@@ -135,8 +135,8 @@ export default function WarmLeadsPage() {
       editable: true,
       type: "select",
       options: [
-        { label: "Steady", value: "STEADY" },
-        { label: "Next Chapter", value: "NEXT_CHAPTER" },
+        { label: "Steady", value: "Steady" },
+        { label: "Next Chapter", value: "Next Chapter" },
       ],
     },
     {
@@ -226,7 +226,7 @@ export default function WarmLeadsPage() {
             {
               label: "Mark Lost",
               variant: "secondary",
-              onClick: (ids) => bulkMutation.mutate({ action: "update", ids, data: { status: "LOST" } })
+              onClick: (ids) => bulkMutation.mutate({ action: "update", ids, data: { status: "Lost" } })
             }
           ]}
         />
