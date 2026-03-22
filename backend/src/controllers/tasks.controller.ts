@@ -96,7 +96,7 @@ export const createTasks = async (req: Request, res: Response) => {
         status: "PENDING",
         // Implicit M2M: connect assigned users
         assignees: {
-          connect: assigneeIds ? assigneeIds.map((id: string) => ({ id })) : [{ id: req.user.id }]
+          connect: assigneeIds && assigneeIds.length > 0 ? assigneeIds.map((id: string) => ({ id })) : [{ id: req.user.id }]
         }
       },
       include: { 

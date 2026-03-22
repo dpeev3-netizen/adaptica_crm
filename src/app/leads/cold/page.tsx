@@ -72,9 +72,8 @@ export default function ColdLeadsPage() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, key, value }: { id: string; key: string; value: any }) => {
-      const res = await fetch(`/api/contacts/${id}`, {
+      const res = await fetchWithToken(`/contacts/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [key]: value }),
       });
       if (!res.ok) throw new Error("Failed to update");
@@ -88,9 +87,8 @@ export default function ColdLeadsPage() {
 
   const customFieldMutation = useMutation({
     mutationFn: async ({ entityId, fieldId, value, type }: any) => {
-      const res = await fetch("/api/custom-field-values", {
+      const res = await fetchWithToken("/custom-field-values", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entityId, fieldId, value, type }),
       });
       if (!res.ok) throw new Error("Failed to save custom field");
@@ -104,9 +102,8 @@ export default function ColdLeadsPage() {
 
   const bulkMutation = useMutation({
     mutationFn: async ({ action, ids, data }: { action: "delete" | "update"; ids: string[]; data?: any }) => {
-      const res = await fetch("/api/contacts/bulk", {
+      const res = await fetchWithToken("/contacts/bulk", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, ids, data }),
       });
       if (!res.ok) throw new Error("Bulk operation failed");
@@ -120,9 +117,8 @@ export default function ColdLeadsPage() {
 
   const addFieldMutation = useMutation({
     mutationFn: async ({ name, type }: { name: string, type: string }) => {
-      const res = await fetch("/api/custom-fields", {
+      const res = await fetchWithToken("/custom-fields", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entityType: "CONTACT", name, type }),
       });
       if (!res.ok) throw new Error("Failed to create custom field");

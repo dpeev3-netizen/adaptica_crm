@@ -68,6 +68,9 @@ export default function TasksPage() {
       setNewTask({ content: "", dueDate: "", priority: "MEDIUM", assigneeIds: [] });
       toast.success("Task created");
     },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to create task");
+    }
   });
 
   const toggleMutation = useMutation({

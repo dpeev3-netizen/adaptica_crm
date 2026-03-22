@@ -89,3 +89,121 @@ export const createContact = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Failed to create contact" });
   }
 };
+
+export const updateContact = async (req: Request, res: Response) => {
+  try {
+    const workspaceId = req.user?.workspaceId;
+    const { id } = req.params;
+    let updateData = req.body;
+
+    const contact = await prisma.contact.findUnique({ where: { id, workspaceId } });
+    if (!contact) return res.status(404).json({ error: "Contact not found" });
+
+    // Pipeline Automations (State Machine)
+    
+    // Rule 1: Cold to Warm
+    if (contact.type === "COLD" && updateData.status === "BOOKED") {
+      updateData.type = "WARM";
+      updateData.status = "STEADY";
+    }
+
+    // Rule 3: Warm to Deal
+    if (contact.type === "WARM" && updateData.status === "NEXT_CHAPTER") {
+      // Find or create 'Negotiating' stage
+      let stage = await prisma.stage.findFirst({
+        where: { pipeline: { workspaceId }, name: "Negotiating" }
+      });
+      if (!stage) {
+         const pipeline = await prisma.pipeline.findFirst({ where: { workspaceId }});
+         if (pipeline) {
+             stage = await prisma.stage.create({
+                 data: { pipelineId: pipeline.id, name: "Negotiating", order: 1 }
+             });
+         }
+      }
+      
+      if (stage) {
+        await prisma.deal.create({
+            data: {
+                workspaceId: workspaceId as string,
+                title: `${contact.name} Deal`,
+                contactId: contact.id,
+                stageId: stage.id,
+                value: 0
+            }
+        });
+      }
+      // Optionally mark contact as moved
+      updateData.status = "MOVED_TO_DEAL";
+    }
+
+    const updated = await prisma.contact.update({
+      where: { id },
+      data: updateData
+    });
+
+    return res.json(updated);
+  } catch (error) {
+    console.error("Error updating contact:", error);
+    return res.status(500).json({ error: "Failed to update contact" });
+  }
+};
+
+export const bulkContacts = async (req: Request, res: Response) => {
+  try {
+    const workspaceId = req.user?.workspaceId;
+    const { action, ids, data } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "No IDs provided" });
+    }
+
+    if (action === "delete") {
+      await prisma.contact.deleteMany({
+        where: { id: { in: ids }, workspaceId }
+      });
+      return res.json({ success: true, message: `Deleted ${ids.length} contacts` });
+    }
+
+    if (action === "update") {
+       // We iterate to respect the state machine triggers sequentially
+       for (const id of ids) {
+          const contact = await prisma.contact.findUnique({ where: { id, workspaceId } });
+          if (!contact) continue;
+
+          let updateData = { ...data };
+
+          // Rule 1
+          if (contact.type === "COLD" && updateData.status === "BOOKED") {
+             updateData.type = "WARM";
+             updateData.status = "STEADY";
+          }
+          // Rule 3
+          if (contact.type === "WARM" && updateData.status === "NEXT_CHAPTER") {
+             let stage = await prisma.stage.findFirst({ where: { pipeline: { workspaceId }, name: "Negotiating" } });
+             if (!stage) {
+                 const pipeline = await prisma.pipeline.findFirst({ where: { workspaceId }});
+                 if (pipeline) stage = await prisma.stage.create({ data: { pipelineId: pipeline.id, name: "Negotiating", order: 1 } });
+             }
+             if (stage) {
+                 await prisma.deal.create({
+                     data: { workspaceId: workspaceId as string, title: `${contact.name} Deal`, contactId: contact.id, stageId: stage.id, value: 0 }
+                 });
+             }
+             updateData.status = "MOVED_TO_DEAL";
+          }
+
+          await prisma.contact.update({
+             where: { id },
+             data: updateData
+          });
+       }
+       return res.json({ success: true, message: `Updated ${ids.length} contacts` });
+    }
+
+    return res.status(400).json({ error: "Invalid action" });
+  } catch (error) {
+    console.error("Bulk action error:", error);
+    return res.status(500).json({ error: "Bulk operation failed" });
+  }
+};

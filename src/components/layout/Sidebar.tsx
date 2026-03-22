@@ -30,7 +30,6 @@ import { useRouter } from "next/navigation";
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Leads", href: "/leads", icon: Users },
-  { name: "Contacts", href: "/contacts", icon: UserCircle },
   { name: "Deals", href: "/deals", icon: Briefcase },
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
   { name: "Calendar", href: "/calendar", icon: Calendar },

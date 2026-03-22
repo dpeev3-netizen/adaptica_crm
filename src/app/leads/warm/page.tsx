@@ -49,9 +49,8 @@ export default function WarmLeadsPage() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, key, value }: { id: string; key: string; value: any }) => {
-      const res = await fetch(`/api/contacts/${id}`, {
+      const res = await fetchWithToken(`/contacts/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [key]: value }),
       });
       if (!res.ok) throw new Error("Failed to update");
@@ -65,9 +64,8 @@ export default function WarmLeadsPage() {
 
   const customFieldMutation = useMutation({
     mutationFn: async ({ entityId, fieldId, value, type }: any) => {
-      const res = await fetch("/api/custom-field-values", {
+      const res = await fetchWithToken("/custom-field-values", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entityId, fieldId, value, type }),
       });
       if (!res.ok) throw new Error("Failed to save custom field");
@@ -81,9 +79,8 @@ export default function WarmLeadsPage() {
 
   const bulkMutation = useMutation({
     mutationFn: async ({ action, ids, data }: { action: "delete" | "update"; ids: string[]; data?: any }) => {
-      const res = await fetch("/api/contacts/bulk", {
+      const res = await fetchWithToken("/contacts/bulk", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, ids, data }),
       });
       if (!res.ok) throw new Error("Bulk operation failed");
@@ -97,9 +94,8 @@ export default function WarmLeadsPage() {
 
   const addFieldMutation = useMutation({
     mutationFn: async ({ name, type }: { name: string, type: string }) => {
-      const res = await fetch("/api/custom-fields", {
+      const res = await fetchWithToken("/custom-fields", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entityType: "CONTACT", name, type }),
       });
       if (!res.ok) throw new Error("Failed to create custom field");
@@ -138,11 +134,8 @@ export default function WarmLeadsPage() {
       editable: true,
       type: "select",
       options: [
-        { label: "Meeting Booked", value: "MEETING_BOOKED" },
-        { label: "Qualified", value: "QUALIFIED" },
-        { label: "Proposal Sent", value: "PROPOSAL_SENT" },
-        { label: "Negotiating", value: "NEGOTIATING" },
-        { label: "Lost", value: "LOST" },
+        { label: "Steady", value: "STEADY" },
+        { label: "Next Chapter", value: "NEXT_CHAPTER" },
       ],
     },
     {
