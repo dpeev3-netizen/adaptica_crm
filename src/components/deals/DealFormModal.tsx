@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import NeoModal from "@/components/ui/NeoModal";
 import NeoInput from "@/components/ui/NeoInput";
@@ -10,9 +10,11 @@ import { fetchWithToken } from '@/lib/api';
 interface DealFormModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editDealId?: string | null;
+  initialData?: any;
 }
 
-export default function DealFormModal({ isOpen, onClose }: DealFormModalProps) {
+export default function DealFormModal({ isOpen, onClose, editDealId, initialData }: DealFormModalProps) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     companyName: "",
@@ -21,6 +23,20 @@ export default function DealFormModal({ isOpen, onClose }: DealFormModalProps) {
     pipelineId: "",
     stageId: "",
   });
+
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setFormData({
+        companyName: initialData.company?.name || initialData.title || "",
+        product: initialData.product || "",
+        value: initialData.value ? String(initialData.value) : "",
+        pipelineId: initialData.pipelineId || "",
+        stageId: initialData.stageId || "",
+      });
+    } else if (isOpen && !editDealId) {
+      setFormData({ companyName: "", product: "", value: "", pipelineId: "", stageId: "" });
+    }
+  }, [isOpen, initialData, editDealId]);
 
   const { data: pipelines } = useQuery({
     queryKey: ["pipelines"],
@@ -43,15 +59,17 @@ export default function DealFormModal({ isOpen, onClose }: DealFormModalProps) {
       if (data.pipelineId) payload.pipelineId = data.pipelineId;
       if (data.stageId) payload.stageId = data.stageId;
 
-      const res = await fetchWithToken('/deals', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const url = editDealId ? `/deals/${editDealId}` : '/deals';
+      const method = editDealId ? "PATCH" : "POST";
+
+      const res = await fetchWithToken(url, {
+        method,
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Failed to create deal");
+        throw new Error(err.error || `Failed to ${editDealId ? 'update' : 'create'} deal`);
       }
 
       return res.json();
@@ -80,7 +98,7 @@ export default function DealFormModal({ isOpen, onClose }: DealFormModalProps) {
   const stages = selectedPipeline?.stages || [];
 
   return (
-    <NeoModal isOpen={isOpen} onClose={onClose} title="Add New Deal">
+    <NeoModal isOpen={isOpen} onClose={onClose} title={editDealId ? "Edit Deal" : "Add New Deal"}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="text-sm font-bold text-muted mb-1 block">Company Name *</label>
@@ -151,7 +169,9 @@ export default function DealFormModal({ isOpen, onClose }: DealFormModalProps) {
             Cancel
           </NeoButton>
           <NeoButton type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "Creating..." : "Create Deal"}
+            {mutation.isPending 
+              ? (editDealId ? "Updating..." : "Creating...") 
+              : (editDealId ? "Update Deal" : "Create Deal")}
           </NeoButton>
         </div>
       </form>

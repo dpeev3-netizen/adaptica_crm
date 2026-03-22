@@ -10,7 +10,7 @@ import NeoButton from "@/components/ui/NeoButton";
 import NeoModal from "@/components/ui/NeoModal";
 import NeoInput from "@/components/ui/NeoInput";
 import DealFormModal from "@/components/deals/DealFormModal";
-import { History, Columns, Plus } from "lucide-react";
+import { History, Columns, Plus, Edit } from "lucide-react";
 import { fetchWithToken } from '@/lib/api';
 
 export default function DealsPage() {
@@ -21,6 +21,7 @@ export default function DealsPage() {
   const [selectedDealName, setSelectedDealName] = useState<string>("");
   const [addFieldModalOpen, setAddFieldModalOpen] = useState(false);
   const [dealFormOpen, setDealFormOpen] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<any>(null);
   const [newFieldName, setNewFieldName] = useState("");
   const [newFieldType, setNewFieldType] = useState("TEXT");
 
@@ -53,10 +54,7 @@ export default function DealsPage() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, key, value }: { id: string; key: string; value: any }) => {
-      const res = await fetch(`/api/deals/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [key]: value }),
+      const res = await fetchWithToken(`/deals/${id}`, { method: "PATCH", body: JSON.stringify({ [key]: value }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -76,10 +74,7 @@ export default function DealsPage() {
 
   const customFieldMutation = useMutation({
     mutationFn: async ({ entityId, fieldId, value, type }: any) => {
-      const res = await fetch("/api/custom-field-values", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entityId, fieldId, value, type }),
+      const res = await fetchWithToken("/custom-field-values", { method: "POST", body: JSON.stringify({ entityId, fieldId, value, type }),
       });
       if (!res.ok) throw new Error("Failed to save custom field");
       return res.json();
@@ -92,10 +87,7 @@ export default function DealsPage() {
 
   const addFieldMutation = useMutation({
     mutationFn: async ({ name, type }: { name: string, type: string }) => {
-      const res = await fetch("/api/custom-fields", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entityType: "DEAL", name, type }),
+      const res = await fetchWithToken("/custom-fields", { method: "POST", body: JSON.stringify({ entityType: "DEAL", name, type }),
       });
       if (!res.ok) throw new Error("Failed to create custom field");
       return res.json();
@@ -108,14 +100,24 @@ export default function DealsPage() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetchWithToken(`/deals/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete deal");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["deals"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["pipelines"] });
+    },
+  });
+
   const handleEdit = async (id: string, key: any, value: any) => {
     if (key === "annualRevenue") {
       const deal = deals?.find((d: any) => d.id === id);
       if (deal?.companyId) {
-        await fetch(`/api/companies/${deal.companyId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ annualRevenue: value ? parseFloat(value) : null }),
+        await fetchWithToken(`/companies/${deal.companyId}`, { method: "PATCH", body: JSON.stringify({ annualRevenue: value ? parseFloat(value) : null }),
         });
         queryClient.invalidateQueries({ queryKey: ["deals"] });
       }
@@ -219,7 +221,7 @@ export default function DealsPage() {
             <NeoButton variant="secondary" onClick={() => setAddFieldModalOpen(true)} className="flex items-center gap-2 h-9 px-3">
               <Columns size={16} /> Add Field
             </NeoButton>
-            <NeoButton onClick={() => setDealFormOpen(true)} className="flex items-center gap-2 h-9 px-3">
+            <NeoButton onClick={() => { setEditingDeal(null); setDealFormOpen(true); }} className="flex items-center gap-2 h-9 px-3">
               <Plus size={16} /> Add Deal
             </NeoButton>
           </div>
@@ -352,7 +354,12 @@ export default function DealsPage() {
         </form>
       </NeoModal>
 
-      <DealFormModal isOpen={dealFormOpen} onClose={() => setDealFormOpen(false)} />
+      <DealFormModal 
+        isOpen={dealFormOpen} 
+        onClose={() => { setDealFormOpen(false); setEditingDeal(null); }} 
+        editDealId={editingDeal?.id}
+        initialData={editingDeal}
+      />
     </div>
   );
 }

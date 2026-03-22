@@ -23,7 +23,7 @@ export default function ActivityFeed({ entityId, entityType }: ActivityFeedProps
   const { data: timeline, isLoading } = useQuery({
     queryKey: ["activities", entityId],
     queryFn: async () => {
-      const res = await fetchWithToken(`/activities/${entityId}`);
+      const res = await fetchWithToken(`/activities?entityId=${entityId}&entityType=${entityType}`);
       if (!res.ok) throw new Error("Failed to fetch timeline");
       return res.json();
     },
@@ -32,10 +32,10 @@ export default function ActivityFeed({ entityId, entityType }: ActivityFeedProps
 
   const generateMutation = useMutation({
     mutationFn: async ({ content, parentId }: { content: string, parentId?: string }) => {
-      const res = await fetch(`/api/activities/${entityId}`, {
+      const res = await fetchWithToken(`/activities`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          entityId,
           entityType,
           type: "NOTE",
           content,

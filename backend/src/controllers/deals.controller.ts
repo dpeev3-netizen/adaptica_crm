@@ -81,17 +81,14 @@ export const createDeals = async (req: Request, res: Response) => {
 
 import { evaluateWorkflows } from "../lib/automations-engine";
 
-export async function PATCH_ID(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const updateDeal = async (req: Request, res: Response) => {
   try {
     const workspaceId = req.user?.workspaceId;
     if (!workspaceId) return res.status(401).json({ error: "Unauthorized" });
-    const { id } = await params;
+    const { id } = req.params;
     const body = req.body;
 
-    const allowedKeys = ["value", "stageId"];
+    const allowedKeys = ["value", "stageId", "title", "product", "companyId", "contactId"];
     const updateData: any = {};
 
     for (const key of allowedKeys) {
@@ -116,10 +113,7 @@ export async function PATCH_ID(
         });
 
         if (activeDealsInStage >= targetStage.wipLimit) {
-          return NextResponse.json(
-            { error: `Stage WIP limit reached (${targetStage.wipLimit})` },
-            { status: 422 }
-          );
+          return res.status(422).json({ error: `Stage WIP limit reached (${targetStage.wipLimit})` });
         }
       }
     }
@@ -161,6 +155,23 @@ export async function PATCH_ID(
   } catch (error) {
     console.error("Error updating deal:", error);
     return res.status(500).json({ error: "Failed to update deal" });
+  }
+}
+
+export const deleteDeal = async (req: Request, res: Response) => {
+  try {
+    const workspaceId = req.user?.workspaceId;
+    if (!workspaceId) return res.status(401).json({ error: "Unauthorized" });
+    const { id } = req.params;
+
+    await prisma.deal.delete({
+      where: { id, workspaceId }
+    });
+
+    return res.json({ success: true, message: "Deal deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting deal:", error);
+    return res.status(500).json({ error: "Failed to delete deal" });
   }
 }
 
